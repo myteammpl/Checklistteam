@@ -185,6 +185,9 @@
   td.mcell.submitted .ok-lbl{font-weight:700}
   td.mcell.empty{background:#fff}
   td.mcell.na{background:repeating-linear-gradient(45deg,#f0f1ee,#f0f1ee 4px,#e8eae6 4px,#e8eae6 8px)}
+  .ckbox.na{background:repeating-linear-gradient(45deg,#f0f1ee,#f0f1ee 4px,#e8eae6 4px,#e8eae6 8px);border-color:var(--line)}
+  table.ck tr.is-na td{opacity:.6}
+  .na-chip{font-size:10.5px;font-weight:700;color:#8a8f7a;background:#eef0ea;border-radius:5px;padding:2px 6px;margin-left:6px;letter-spacing:.02em}
   .mgr-flag{position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#e0362e;color:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:4;border:1.5px solid #fff}
   .mgr-flag svg{width:9px;height:9px}
   .ckbox.submitted{background:#f5a524;border-color:#f5a524}
@@ -642,8 +645,8 @@
   </nav>
   <div id="userChip"></div>
   <div class="side-foot">
-    <div class="conn demo" id="connStatus" onclick="openConnect()"><span class="dot"></span><span id="connText">โหมดทดลอง</span></div>
-    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">v2569.08.06-1</div>
+    <div class="conn live" id="connStatus" onclick="openConnect()"><span class="dot"></span><span id="connText">ซิงก์ Google Sheet</span></div>
+    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">v2569.08.08-1</div>
   </div>
 </aside>
 
@@ -670,11 +673,6 @@
 <main>
   <!-- ============ DASHBOARD ============ -->
   <section class="page active" id="page-dash">
-    <div id="setupBanner" class="setup-banner">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
-      <div style="flex:1">กำลังใช้ <b>โหมดทดลอง</b> — ข้อมูลยังไม่ถูกบันทึกถาวร เชื่อมต่อ Google Sheet เพื่อให้ทุกคนเห็นข้อมูลชุดเดียวกัน <a onclick="openConnect()">ตั้งค่าการเชื่อมต่อ →</a></div>
-    </div>
-
     <div class="page-head">
       <div>
         <h1>ภาพรวมงานปิดบัญชี</h1>
@@ -1101,38 +1099,22 @@
 <!-- Connect modal -->
 <div class="overlay" id="connectModal">
   <div class="modal" style="max-width:540px">
-    <div class="modal-h"><h3>เชื่อมต่อ Google Sheet</h3><button class="icon-btn" onclick="closeModal('connectModal')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-h"><h3>การเชื่อมต่อ Google Sheet</h3><button class="icon-btn" onclick="closeModal('connectModal')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-b">
-      <div id="embedStatusBanner"></div>
-      <label>วาง URL ของ Google Apps Script Web App</label>
-      <input type="url" id="apiInput" placeholder="https://script.google.com/macros/s/.../exec">
-      <p style="font-size:12px;color:var(--muted);margin:-8px 0 16px">ดูวิธีสร้างในไฟล์คู่มือติดตั้ง · เมื่อเชื่อมแล้วข้อมูลทุกคนจะซิงก์เป็นชุดเดียวกัน</p>
-      <div style="background:var(--paper);border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--ink-soft)">
-        <b>ยังไม่ได้ตั้งค่า?</b> ระบบทำงานได้ในโหมดทดลองก่อน (ข้อมูลเก็บในเบราว์เซอร์นี้) เชื่อม Sheet ภายหลังได้ทุกเมื่อ
+      <div class="embed-banner on">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+        <div><b>ไฟล์นี้เชื่อมต่อ Google Sheet คงที่ตัวเดียว</b>ทุกคนที่เปิดไฟล์นี้เชื่อมต่อ Sheet เดียวกันเสมอ ไม่มีโหมดทดลองหรือข้อมูลสำรองในเบราว์เซอร์ — ข้อมูลที่เห็นทั้งหมดดึงจาก Sheet จริงเท่านั้น</div>
       </div>
+      <p style="font-size:12.5px;color:var(--muted);margin:14px 0 0">
+        การเชื่อมต่อฝังไว้ในโค้ดโดยตรง (<code>const API_URL</code>) เปลี่ยนไม่ได้จากหน้านี้ — ถ้าต้องการเชื่อมกับ Sheet อื่น (เช่น ทำสำเนาให้โรงงาน/บริษัทอื่น) ให้แก้บรรทัด <code>const API_URL = "..."</code> ในไฟล์ต้นฉบับโดยตรง แล้วแจกไฟล์ที่แก้แล้วต่อ
+      </p>
 
       <div style="margin-top:20px">
-        <label style="margin-bottom:8px">ให้ทีมในโรงงานนี้ (เช่น 7 คน) เชื่อม Sheet เดียวกันอัตโนมัติ</label>
-        <div class="dl-list">
-          <div class="dl-row">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
-            <div class="txt"><b>ฝัง URL ลงไฟล์แล้วดาวน์โหลด</b><span>ทุกคนที่เปิดไฟล์นี้จะเชื่อมต่อ Sheet เดียวกันทันที ไม่ต้องกรอก URL เอง</span></div>
-            <button class="dl-btn" onclick="downloadEmbeddedApp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>ฝังและดาวน์โหลด</button>
-          </div>
-          <div class="dl-row">
-            <div class="ic" style="background:var(--red-bg);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></div>
-            <div class="txt"><b>รีเซ็ต URL ก่อนส่งต่อ</b><span>ลบ URL ที่ฝังไว้ออก แล้วดาวน์โหลดไฟล์สะอาดสำหรับส่งให้โรงงาน/บริษัทอื่น</span></div>
-            <button class="dl-btn" onclick="downloadResetApp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>รีเซ็ตและดาวน์โหลด</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:16px">
         <label style="margin-bottom:8px">ไฟล์สำหรับส่งต่อให้โรงงาน/บริษัทอื่นตั้งค่าเอง</label>
         <div class="dl-list">
           <div class="dl-row">
             <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17V3h11l5 5v9H4z"/><path d="M15 3v5h5M8 13h8M8 17h5"/></svg></div>
-            <div class="txt"><b>checklist_app.html</b><span>ตัวแอป — เปิดใช้งานได้ทันทีในเบราว์เซอร์</span></div>
+            <div class="txt"><b>checklist_app.html</b><span>ตัวแอป (มี API_URL ปัจจุบันติดไปด้วย — แก้บรรทัดนี้ก่อนแจกถ้าต้องเชื่อม Sheet อื่น)</span></div>
             <button class="dl-btn" onclick="downloadFile('app')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>ดาวน์โหลด</button>
           </div>
           <div class="dl-row">
@@ -1150,8 +1132,7 @@
       </div>
     </div>
     <div class="modal-f">
-      <button class="btn btn-ghost" onclick="disconnectSheet()">ใช้โหมดทดลอง</button>
-      <button class="btn btn-pri" onclick="connectSheet()">เชื่อมต่อ</button>
+      <button class="btn btn-pri" onclick="closeModal('connectModal')">ปิด</button>
     </div>
   </div>
 </div>
@@ -1161,19 +1142,15 @@
 <script>
 /* =========================================================
    MPL Closing Checklist  —  single-file web app
-   Backend: Google Apps Script (optional). Falls back to
-   localStorage "demo mode" so it works immediately.
+   Backend: Google Apps Script — เชื่อมต่อ Sheet เดียวเสมอ (const API_URL คงที่)
+   ไม่มี localStorage fallback / โหมดทดลอง / demo mode — ตามรูปแบบระบบ E-Sign
    ========================================================= */
 
 /* ---------------------------------------------------------
-   FACTORY_API_URL — วาง Web App URL ของโรงงาน/บริษัทนี้ตรงนี้ได้โดยตรง
-   (แก้ไขบรรทัดนี้ด้วยมือ หรือใช้ปุ่ม "ฝัง URL ลงไฟล์แล้วดาวน์โหลด"
-   ในหน้าตั้งค่าการเชื่อมต่อก็ได้ผลเหมือนกัน)
-   เมื่อมีค่าตรงนี้ ทุกคนที่เปิดไฟล์นี้จะเชื่อมต่อ Sheet เดียวกันอัตโนมัติ
-   โดยไม่ต้องกรอก URL เองทีละคน — เหมาะสำหรับแจกให้ทีมในโรงงานเดียวกัน (เช่น 7 คน)
-   ก่อนส่งไฟล์นี้ให้โรงงาน/บริษัทอื่น ให้กด "รีเซ็ต URL" ก่อน ป้องกันข้อมูลปนกัน
+   API_URL — Web App URL ของ Google Apps Script ที่เชื่อมต่อ ฝังตรงนี้ค่าเดียว ไม่มี fallback
+   (เปลี่ยนบริษัท/โรงงานอื่น ให้แก้บรรทัดนี้ตรงๆ ในซอร์สโค้ด แล้วแจกไฟล์ต่อ)
    --------------------------------------------------------- */
-const FACTORY_API_URL = "https://script.google.com/macros/s/AKfycbyRsCW5Wv_-LERCSfFMb08KXFOT5ZEl5XjTAJoktBGppTFCYrhDX0zk7v_DPfnF9CpPjw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyRsCW5Wv_-LERCSfFMb08KXFOT5ZEl5XjTAJoktBGppTFCYrhDX0zk7v_DPfnF9CpPjw/exec";
 
 const CAT_COLORS = {
   '1':'#2f8a4e','2':'#b8791a','3':'#8a6d2f','4':'#2f5f8a',
@@ -1254,10 +1231,6 @@ const DEFAULT_CONFIG = [
 ];
 
 /* ---------------- State ---------------- */
-// ลำดับความสำคัญ: URL ที่ฝังในไฟล์ (FACTORY_API_URL) > URL ที่เคยกรอกไว้ในเบราว์เซอร์นี้ (localStorage)
-// เพื่อให้ทุกคนที่เปิดไฟล์เดียวกัน (เช่น 7 คนในทีม) เชื่อมต่อ Sheet เดียวกันอัตโนมัติโดยไม่ต้องกรอกเอง
-let API_URL = FACTORY_API_URL || localStorage.getItem('mpl_api') || '';
-let usingEmbeddedURL = !!FACTORY_API_URL;
 // ===== Multi-company =====
 // รายการบริษัทที่ระบบนี้ดูแล (1 Sheet เก็บได้หลายบริษัท) — ตั้งค่าที่หน้า "ตั้งค่าบริษัท"
 // เก็บเป็น [{code:'1160', name:'บริษัท รวมเกษตรกรอุตสาหกรรม จำกัด', plant:'MPL'}, ...]
@@ -1375,29 +1348,96 @@ function canEditTips(){ return CURRENT_ROLE()==='accountant'||CURRENT_ROLE()==='
 function isManagerViewOnly(){ return CURRENT_ROLE()==='manager'; }
 const ROLE_LABEL={accountant:'นักบัญชี',supervisor:'หัวหน้าแผนก',manager:'ผู้จัดการ'};
 
-function load(k,def){try{return JSON.parse(localStorage.getItem(k))||def}catch{return def}}
-function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+// load()/save() — ตามคำขอ: ห้ามแสดงผลข้อมูลที่มาจาก localStorage เด็ดขาด ต้องดึงจาก Sheet ที่เชื่อมไว้เท่านั้น
+// เดิมสองฟังก์ชันนี้ใช้ localStorage เป็นแคชให้เห็นข้อมูลทันทีก่อน sync เสร็จ และจำข้อมูลไว้ข้ามการเปิดหน้าเว็บใหม่
+// ตอนนี้ตั้งใจทำให้ "ไม่มีผล" กับ localStorage เลย (ไม่อ่าน ไม่เขียน) โดยไม่ต้องไล่แก้ทุกจุดที่เรียกใช้ทั่วไฟล์
+// (มีมากกว่า 50 จุด) — ทุกจุดยังเรียก load()/save() เหมือนเดิมได้ปกติ แค่ผลลัพธ์จะไม่ผูกกับเบราว์เซอร์อีกต่อไป
+// ผลคือ: เปิดหน้าเว็บใหม่ทุกครั้งจะเริ่มจากค่าว่าง (default) แล้วรอข้อมูลจริงจาก syncFromSheet() มาแทนที่เสมอ
+function load(k,def){ return def; }
+function save(k,v){ /* ตั้งใจไม่บันทึกลง localStorage */ }
 function defaultYear(){return new Date().getFullYear()+543}  // พ.ศ. ปัจจุบัน
 function defaultPeriod(){const d=new Date();return `${d.getFullYear()+543}-${String(d.getMonth()+1).padStart(2,'0')}`}
-function periodLabel(p){const[y,m]=p.split('-');return `${MONTHS[+m-1]} ${y}`}
+function periodLabel(p){const[y,m]=String(p||'').split('-');return `${MONTHS[+m-1]||''} ${y||''}`}
+
+// ===== Status normalization / lookup =====
+// Google Sheet อาจคืน company/period/code เป็น string, number หรือมีช่องว่าง
+// จึง normalize ทุกค่าก่อนสร้าง key เพื่อให้ข้อมูลเดิมใน Sheet ถูกนำมาแสดงได้แน่นอน
+function normCompany(v){ return String(v==null?'':v).trim(); }
+function normPeriod(v){
+  if(v instanceof Date && !isNaN(v.getTime())){
+    const d=v;
+    return `${d.getFullYear()+543}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  let s=String(v==null?'':v).trim();
+  const m=s.match(/^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/);
+  return m ? `${m[1]}-${String(m[2]).padStart(2,'0')}` : s;
+}
+function normCode(v){ return String(v==null?'':v).trim(); }
+function statusKey(company,period){ return `${normCompany(company)}|${normPeriod(period)}`; }
+
+// แปลงค่าจาก Sheet ให้เป็นชนิดข้อมูลที่หน้าเว็บใช้จริง
+function normalizeStatusRecord(rec){
+  const r=(rec&&typeof rec==='object')?{...rec}:{};
+  r.done = r.done===true || r.done===1 || String(r.done||'').trim().toUpperCase()==='TRUE';
+  r.wf = String(r.wf||'').trim().toLowerCase();
+  if(!r.wf && r.done) r.wf='approved';
+  return r;
+}
+
+// รับ statusAll จาก backend และจัด key ใหม่ทั้งหมด
+// ถ้ามีข้อมูลซ้ำ ให้ record หลังสุดชนะ ซึ่งตรงกับลำดับแถวล่าสุดใน Sheet
+function normalizeStatusAll(raw){
+  const out={};
+  if(!raw || typeof raw!=='object') return out;
+  Object.keys(raw).forEach(rawKey=>{
+    const parts=String(rawKey).split('|');
+    if(parts.length<2) return;
+    const company=normCompany(parts.shift());
+    const period=normPeriod(parts.join('|'));
+    if(!company || !period) return;
+    const k=statusKey(company,period);
+    const src=raw[rawKey];
+    if(!src || typeof src!=='object') return;
+    out[k]=out[k]||{};
+    Object.keys(src).forEach(code=>{
+      const c=normCode(code);
+      if(c) out[k][c]=normalizeStatusRecord(src[code]);
+    });
+  });
+  return out;
+}
+
 // accessor ทั้งหมดใช้ key แบบ "บริษัท|งวด" เพื่อแยกข้อมูลแต่ละบริษัท
-function getStatus(){const k=ck(curPeriod);statusData[k]=statusData[k]||{};return statusData[k]}
-function statusOf(period){const k=ck(period);statusData[k]=statusData[k]||{};return statusData[k]}
+function getStatus(){
+  const k=statusKey(curCompany,curPeriod);
+  statusData[k]=statusData[k]||{};
+  return statusData[k];
+}
+function statusOf(period){
+  const k=statusKey(curCompany,period);
+  statusData[k]=statusData[k]||{};
+  return statusData[k];
+}
 function allPeriods(){return Array.from({length:12},(_,i)=>`${curYear}-${String(i+1).padStart(2,'0')}`)}
 function tbInfo(period){const k=ck(period);const rows=tbData[k];const meta=tbMeta[k];return{count:rows?rows.length:0,at:meta?meta.at:'',by:meta?meta.by:''};}
 
-/* ---------------- Google Sheet backend ---------------- */
+/* ---------------- Google Sheet backend ----------------
+   รูปแบบการเชื่อมต่อ/ส่ง-รับข้อมูล อ้างอิงตามระบบ E-Sign (E_Sign_Document-system_V1_0.html):
+   - request:  {action, payload:{...}}  (ห่อฟิลด์ทั้งหมดไว้ใน payload แทนการแผ่ออกมาตรงๆ)
+   - response: ใช้ฟิลด์ success/error (นอกเหนือจาก ok เดิม ที่ backend ยังคงส่งมาคู่กันเพื่อความเข้ากันได้)
+   - header 'text/plain;charset=utf-8' หลีกเลี่ยง CORS preflight กับ Apps Script (ตามที่ E-Sign ใช้) */
 async function apiCall(action,payload){
   if(!API_URL) return null;
   try{
-    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,...payload})});
+    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action, payload:payload||{}})});
     if(!res.ok){
       console.warn('API HTTP error',res.status,res.statusText);
       toast(`เชื่อมต่อ Sheet ไม่สำเร็จ (HTTP ${res.status}) · ใช้ข้อมูลในเครื่องแทน`,true);
       return null;
     }
     const text=await res.text();
-    try{ return JSON.parse(text); }
+    let data;
+    try{ data=JSON.parse(text); }
     catch(parseErr){
       // ตอบกลับมาไม่ใช่ JSON — ส่วนใหญ่เกิดจาก Apps Script ยังไม่ได้ตั้ง "Who has access: Anyone"
       // (ตอบกลับเป็นหน้า HTML ให้ล็อกอิน Google แทน) หรือ deploy เวอร์ชันที่ error อยู่ภายใน
@@ -1405,6 +1445,11 @@ async function apiCall(action,payload){
       toast('เชื่อมต่อ Sheet ไม่สำเร็จ (รูปแบบข้อมูลผิดปกติ) · ตรวจสอบการตั้งค่า Deploy · ใช้ข้อมูลในเครื่องแทน',true);
       return null;
     }
+    // แปลง success -> ok เผื่อ backend เก่าที่ยังไม่ได้ deploy ใหม่ส่งมาแค่ success โดยไม่มี ok คู่มาด้วย
+    // ไฟล์นี้เช็ค r.ok อยู่หลายร้อยจุด จึงแปลงให้ตรงกันตรงทางเข้าเดียว ไม่ต้องไล่แก้ทุกจุดในไฟล์
+    if(data && typeof data.ok==='undefined' && typeof data.success!=='undefined'){ data.ok=data.success; }
+    if(data && data.success===false && data.error) console.warn('API',action,'returned error:',data.error);
+    return data;
   }catch(e){
     console.warn('API network error',e);
     toast('เชื่อมต่อ Sheet ไม่สำเร็จ (เครือข่าย/CORS) · ใช้ข้อมูลในเครื่องแทน',true);
@@ -1441,14 +1486,17 @@ async function syncFromSheet(allYear){
     }
     // ถ้ายังไม่ได้เลือกบริษัท หรือบริษัทที่เลือกไว้หายไปแล้ว ให้เลือกตัวแรกที่ผู้ใช้มีสิทธิ์เห็น
     ensureValidCompany();
-    // Safe Sync: merge ข้อมูลจาก Sheet แทนการทับ statusData ทั้งก้อน
-    // response ว่าง/ไม่ครบชั่วคราวจึงไม่ทำให้ Check OK ที่เพิ่งบันทึกหายจากหน้าเว็บ
+    // Status: ใช้ข้อมูลจาก Sheet เป็น source of truth
+    // normalize company/period/code ก่อนเก็บ เพื่อให้ข้อมูลเก่าใน Sheet แสดงได้แม้ชนิดข้อมูลต่างกัน
     if(r.statusAll && typeof r.statusAll==='object'){
-      const merged={...statusData};
-      Object.keys(r.statusAll).forEach(k=>{ merged[k]={...(merged[k]||{}),...(r.statusAll[k]||{})}; });
-      statusData=merged;
+      statusData=normalizeStatusAll(r.statusAll);
     } else if(r.status && typeof r.status==='object'){
-      statusData[ck(curPeriod)]={...(statusData[ck(curPeriod)]||{}),...r.status};
+      const k=statusKey(curCompany,curPeriod);
+      statusData[k]=statusData[k]||{};
+      Object.keys(r.status).forEach(code=>{
+        const c=normCode(code);
+        if(c) statusData[k][c]=normalizeStatusRecord(r.status[code]);
+      });
     }
     // TB Safe Sync: Sheet เป็น source of truth แต่ไม่ล้างข้อมูล local ทั้งก้อนจาก response ผิดปกติ
     if(r.tbMeta && typeof r.tbMeta==='object'){
@@ -1585,7 +1633,7 @@ function buildPeriodSel(){
   mSel.value=cm;ySel.value=curYear;
   const onChange=async()=>{
     curYear=+ySel.value;save('mpl_curyear',curYear);
-    curPeriod=`${curYear}-${mSel.value}`;
+    curPeriod=normPeriod(`${curYear}-${mSel.value}`);
     await syncFromSheet(dashView==='year');
     await syncChecklistCodesToCurrentCompany();
     renderDash();renderCheck();renderUploadStatus();renderAdmin();
@@ -1596,8 +1644,10 @@ function buildPeriodSel(){
 /* ---------------- Progress calc ---------------- */
 function catProgress(cat){
   const st=getStatus();let done=0;
-  const items=enabledItemsOf(cat); // นับเฉพาะรายการที่บริษัทนี้ต้องทำ
-  items.forEach(it=>{if(st[it.code]?.done)done++;});
+  // นับเฉพาะรายการที่บริษัทนี้ต้องทำ (enabledItemsOf) และไม่ถูกปิดช่อง N/A สำหรับงวดนี้โดยเฉพาะ (isPeriodDisabled)
+  // ถ้าไม่กรอง periodDisabled ออก รายการที่ทำเครื่องหมาย "ไม่มีในแผน" จะยังถูกนับเป็น "ยังไม่ทำ" ค้างตลอดไป ทำให้ % ผิด
+  const items=enabledItemsOf(cat).filter(it=>!isPeriodDisabled(it.code));
+  items.forEach(it=>{if(st[normCode(it.code)]?.done)done++;});
   return {done,total:items.length};
 }
 function overallProgress(){
@@ -1620,7 +1670,6 @@ document.getElementById('dashViewSeg').addEventListener('click',async e=>{
 /* ---------------- Dashboard ---------------- */
 function renderDash(){
   document.getElementById('dashSub').textContent=`งวด ${periodLabel(curPeriod)} · ติดตามความคืบหน้าของทุกหมวดงาน`;
-  document.getElementById('setupBanner').style.display=API_URL?'none':'flex';
   const ov=overallProgress();
   const pct=ov.total?Math.round(ov.done/ov.total*100):0;
   const doneCat=config.filter(c=>{const p=catProgress(c);return p.total&&p.done===p.total;}).length;
@@ -1717,13 +1766,15 @@ function renderMatrix(){
       const tipsIcon = showTips ? `<span class="tips-flag-inline" onclick="event.stopPropagation();viewTips('${it.code}')" title="ดู TIPS การตรวจสอบ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17a1 1 0 001 1h6a1 1 0 001-1v-2.3A7 7 0 0012 2z"/></svg></span>` : '';
       body+=`<tr><td class="code">${it.code}</td><td class="detail">${it.detail}${tipsIcon}</td>`;
       periods.forEach(p=>{
-        const rec=statusOf(p)[it.code]||{};
+        const rec=statusOf(p)[normCode(it.code)]||{};
         const wf=rec.wf||(rec.done?'approved':'draft');
         const link=rec.link;
         const mgrFlag = hasManagerComment(rec);
         const flagHtml = mgrFlag ? `<span class="mgr-flag" title="มีความเห็นจากผู้จัดการ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>` : '';
         const tip=`${it.detail} · ${periodLabel(p)}${link?' · มีลิงก์เอกสาร':''}${wf==='submitted'?' · รอตรวจสอบ':wf==='approved'?' · อนุมัติแล้ว':''}`;
-        if(wf==='approved'){
+        if(isPeriodDisabled(it.code,p)){
+          body+=`<td class="mcell na" title="ไม่มีในแผนงวดนี้ (ปิดช่อง) · ${it.detail} · ${periodLabel(p)}" onclick="openItemCard('${it.code}','${p}')">${flagHtml}</td>`;
+        }else if(wf==='approved'){
           body+=`<td class="mcell ok${link?' has-link':''}" title="${tip}" onclick="openItemCard('${it.code}','${p}')">`
             +`<span class="ok-lbl">OK</span>`
             +(link?`<svg class="ok-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>`:'')
@@ -1856,7 +1907,12 @@ function buildIcFooterAndCommentBox(rec,role,wf,item){
     commentInput.placeholder='พิมพ์ความเห็น...';
     commentInput.value='';
     saveBtn.style.display='';
+    const code=item?item.code:icCurCode;
+    const isNA=isPeriodDisabled(code,icCurPeriod);
     let btns=`<button class="btn btn-ghost" onclick="closeModal('itemCardModal')">ปิด</button>`;
+    // สลับสถานะ "ไม่มีในแผน (ปิดช่อง)" — เฉพาะหัวหน้าแผนก สำหรับรายการที่งวดนี้ไม่ต้องทำจริงๆ
+    // ทำให้รายการนั้นไม่ถูกนับใน % ความคืบหน้า และตารางปีจะโชว์เป็นลายตารางแทนช่องว่างเฉยๆ
+    btns+=`<button type="button" class="btn-period-na${isNA?' active':''}" onclick="icToggleNA()">${isNA?'เปิดช่องกลับเข้าแผน':'ไม่มีในแผน (ปิดช่อง)'}</button>`;
     if(wf==='approved') btns+=`<button class="btn btn-ghost" style="color:var(--red)" onclick="icReopen()">เปิดใหม่ (ยกเลิกอนุมัติ)</button>`;
     btns+=`<button class="btn btn-pri" style="background:var(--green)" onclick="icApprove()">ตกลง (อนุมัติ)</button>`;
     footer.innerHTML=btns;
@@ -1936,6 +1992,15 @@ async function icReopen(){
   toast('ยกเลิกการอนุมัติแล้ว เปิดให้แก้ไขใหม่');
 }
 
+// สลับสถานะ "ไม่มีในแผน (ปิดช่อง)" จากปุ่มในการ์ดโดยตรง — ใช้ icCurCode/icCurPeriod ที่ตั้งไว้ตอนเปิดการ์ด (openItemCard)
+// togglePeriodDisabled ข้างในจะ sync ขึ้น Sheet และ render ตาราง/เช็คลิสต์เบื้องหลังให้เองอยู่แล้ว
+// จากนั้นเปิดการ์ดซ้ำ (re-render) เพื่อให้ปุ่มและ badge สถานะในการ์ดอัปเดตทันทีโดยไม่ต้องปิดการ์ด
+async function icToggleNA(){
+  if(!icCurCode||!icCurPeriod) return;
+  await togglePeriodDisabled(icCurCode,icCurPeriod);
+  openItemCard(icCurCode,icCurPeriod);
+}
+
 async function icAddComment(){
   const role=CURRENT_ROLE();
   if(role==='accountant'){toast('กรุณาใช้ปุ่ม "ส่งงาน" เพื่อบันทึกหมายเหตุ',true);return;}
@@ -1970,11 +2035,9 @@ async function toggleMonth(code,period){
 
 
 function canCloseUnplanned(){
-  const u=(typeof currentUser!=='undefined' && currentUser)?currentUser:{};
-  const role=String(u.role||u.position||'').toLowerCase();
-  const roleTh=String(u.role||u.position||'');
-  return canAdmin() || role.includes('head') || role.includes('section head') ||
-         roleTh.includes('หัวหน้าแผนก') || roleTh.includes('ผู้ดูแลระบบ');
+  // เฉพาะหัวหน้าแผนก (supervisor) เท่านั้นที่ปิดช่อง N/A ได้ — ใช้ระบบสิทธิ์เดียวกับทั้งแอป (CURRENT_ROLE)
+  // บัญชี admin เริ่มต้น (DEFAULT_ADMIN) ก็มี authRole เป็น 'supervisor' อยู่แล้ว จึงครอบคลุมกรณีผู้ดูแลระบบด้วย
+  return CURRENT_ROLE()==='supervisor';
 }
 
 function isPeriodDisabled(code, period=curPeriod){
@@ -2012,9 +2075,10 @@ function renderCheck(){
   if(banner) banner.style.display = readOnly ? 'flex' : 'none';
   if(!cat){body.innerHTML='<tr><td colspan="7"><div class="empty">ยังไม่มีรายการ</div></td></tr>';return;}
   enabledItemsOf(cat).forEach(it=>{
-    const rec=st[it.code]||{};
+    const rec=st[normCode(it.code)]||{};
     const wf=rec.wf||(rec.done?'approved':'draft');
-    const tr=document.createElement('tr');if(wf==='approved')tr.className='is-done';
+    const isNA=isPeriodDisabled(it.code);
+    const tr=document.createElement('tr');if(wf==='approved')tr.className='is-done';if(isNA)tr.className=(tr.className?tr.className+' ':'')+'is-na';
     const glTags=(it.gl||[]).map(g=>`<span class="gl-tag">${g}</span>`).join('');
     const showTips = it.tips && it.tipsShow;
     const tipsIcon = showTips ? `<span class="tips-flag-inline" onclick="event.stopPropagation();viewTips('${it.code}')" title="ดู TIPS การตรวจสอบ" style="vertical-align:middle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7V17a1 1 0 001 1h6a1 1 0 001-1v-2.3A7 7 0 0012 2z"/></svg></span>` : '';
@@ -2031,9 +2095,9 @@ function renderCheck(){
     const whoTxt = wf==='approved' ? `อนุมัติ ${rec.by||''}<br>${rec.at||''}`
       : wf==='submitted' ? `ส่งโดย ${rec.submittedBy||''}<br>${rec.submittedAt||''}` : '—';
     tr.innerHTML=`
-      <td><div class="ckbox ${wf==='approved'?'on':wf} " onclick="${openCard}" style="cursor:pointer" title="คลิกเพื่อเปิดรายละเอียด">${ckboxInner}</div></td>
+      <td><div class="ckbox ${isNA?'na':(wf==='approved'?'on':wf)} " onclick="${openCard}" style="cursor:pointer" title="คลิกเพื่อเปิดรายละเอียด">${isNA?'':ckboxInner}</div></td>
       <td class="code-cell" style="cursor:pointer" onclick="${openCard}">${it.code}</td>
-      <td class="detail-cell" style="cursor:pointer" onclick="${openCard}"><b>${it.detail}${tipsIcon}</b>${glTags?`<div class="gl-tags">${glTags}</div>`:''}</td>
+      <td class="detail-cell" style="cursor:pointer" onclick="${openCard}"><b>${it.detail}${tipsIcon}</b>${isNA?'<span class="na-chip">ไม่มีในแผน</span>':''}${glTags?`<div class="gl-tags">${glTags}</div>`:''}</td>
       <td><span class="out-tag">${it.output||'-'}</span></td>
       <td>${linkTxt}</td>
       <td class="note-cell" style="cursor:pointer" onclick="${openCard}">${mgrFlag?`<span class="mgr-flag" style="position:static;display:inline-grid;margin-right:5px;vertical-align:middle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>`:''}<span style="font-size:12px;color:var(--ink-soft)">${notePreview}</span></td>
@@ -2526,7 +2590,11 @@ async function updateCompany(i,key,val){
   }
   await saveCompaniesLocal();
   ensureValidCompany();   // ถ้ายังไม่ได้เลือกบริษัท (เช่นเพิ่งเพิ่มบริษัทแรก) ให้เลือกให้อัตโนมัติ
-  buildCompanySel(); applyCompanyLabel(); renderCompany();
+  buildCompanySel(); applyCompanyLabel();
+  // sync ใหม่เสมอหลังแก้ไขบริษัท เพื่อให้ระบบดึง/seed config ของบริษัทที่เพิ่งตั้งค่าให้ถูกต้อง
+  // (ถ้าไม่ sync ตรงนี้ กรณีเพิ่มบริษัทแรกแล้วยังไม่เคยมี config เลย จะเจอเช็คลิสต์ว่างเปล่าค้างไว้จนกว่าจะสลับบริษัทหรือรีโหลดหน้า)
+  if(curCompany){ await syncFromSheet(); renderDash(); renderCheck(); }
+  renderCompany();
 }
 async function removeCompany(i){
   if(CURRENT_ROLE()!=='supervisor'){toast('คุณไม่มีสิทธิ์ลบบริษัท',true);return;}
@@ -2995,35 +3063,8 @@ async function saveRulesLocal(){
 
 /* ---------------- Connect ---------------- */
 function openConnect(){
-  document.getElementById('apiInput').value=API_URL;
-  renderEmbedBanner();
   openModal('connectModal');
 }
-function renderEmbedBanner(){
-  const el=document.getElementById('embedStatusBanner'); if(!el)return;
-  if(usingEmbeddedURL){
-    el.innerHTML=`<div class="embed-banner on">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-      <div><b>ไฟล์นี้ฝัง URL ของโรงงานไว้แล้ว</b>ทุกคนที่เปิดไฟล์นี้จะเชื่อมต่อ Sheet เดียวกันอัตโนมัติ โดยไม่ต้องกรอก URL เอง</div>
-    </div>`;
-  }else{
-    el.innerHTML=`<div class="embed-banner off">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
-      <div><b>ไฟล์นี้ยังไม่ได้ฝัง URL</b>แต่ละคนต้องกรอก URL เอง (หรือฝังไว้ในไฟล์ให้ทีมด้านล่าง)</div>
-    </div>`;
-  }
-}
-async function connectSheet(){
-  const url=document.getElementById('apiInput').value.trim();
-  if(!url){toast('กรุณาวาง URL',true);return;}
-  API_URL=url;localStorage.setItem('mpl_api',url);
-  closeModal('connectModal');setConn();
-  toast('กำลังเชื่อมต่อ...');await syncFromSheet();
-  renderDash();renderCheck();toast('เชื่อมต่อ Google Sheet สำเร็จ');
-  // ถ้ายังไม่ login ให้เช็คว่าควรโชว์ฟอร์มตั้งค่าเริ่มต้นครั้งแรก (Sheet ใหม่ยังไม่มีสมาชิก) หรือฟอร์ม login ปกติ
-  if(!currentSession){ await checkFirstTimeSetup(); }
-}
-function disconnectSheet(){API_URL='';localStorage.removeItem('mpl_api');closeModal('connectModal');setConn();renderDash();toast('เปลี่ยนเป็นโหมดทดลอง');}
 
 /* ---------------- Download setup files (สำหรับส่งต่อให้ทีม/โรงงานอื่น) ---------------- */
 // เก็บเป็น base64 เพื่อฝังไฟล์ Code.gs และคู่มือ (ซึ่งไม่ได้อยู่ในหน้าเว็บนี้) ไว้ในตัวแอปเอง
@@ -3071,37 +3112,10 @@ function getCleanAppHtml(){
   clone.querySelectorAll('.overlay.show').forEach(el=>el.classList.remove('show'));
   clone.querySelectorAll('.toast.show').forEach(el=>el.classList.remove('show'));
   clone.querySelectorAll('input, textarea').forEach(el=>{
-    const orig = document.getElementById(el.id);
-    // เคลียร์ค่าที่พิมพ์ไว้ใน modal ต่างๆ (URL, ข้อความ TIPS ฯลฯ) ไม่ให้ติดไปกับไฟล์ที่แจกต่อ
-    if(el.id==='apiInput'||el.id==='linkInput'||el.id==='tipsEditText'||el.id==='editRuleDesc') el.value='';
+    // เคลียร์ค่าที่พิมพ์ไว้ใน modal ต่างๆ (ข้อความ TIPS ฯลฯ) ไม่ให้ติดไปกับไฟล์ที่แจกต่อ
+    if(el.id==='linkInput'||el.id==='tipsEditText'||el.id==='editRuleDesc') el.value='';
   });
   return '<!DOCTYPE html>\n' + clone.outerHTML;
-}
-
-// แทนที่บรรทัด const FACTORY_API_URL = "..."; ในซอร์สโค้ดของหน้านี้ด้วยค่าใหม่ที่ระบุ
-// ใช้ regex ที่เจาะจงมาก (จับเฉพาะรูปแบบการประกาศตัวแปรนี้เท่านั้น) เพื่อไม่ให้ไปแก้ข้อความอื่นโดยไม่ตั้งใจ
-function buildAppHtmlWithEmbeddedUrl(url){
-  const html = getCleanAppHtml();
-  const pattern = /const FACTORY_API_URL = "[^"]*";/;
-  if(!pattern.test(html)){
-    toast('ไม่พบตำแหน่งสำหรับฝัง URL ในไฟล์ กรุณาตรวจไฟล์ต้นฉบับ',true);
-    return null;
-  }
-  return html.replace(pattern, `const FACTORY_API_URL = "${url.replace(/"/g,'&quot;')}";`);
-}
-function downloadEmbeddedApp(){
-  const url=document.getElementById('apiInput').value.trim() || API_URL;
-  if(!url){toast('กรุณากรอก URL ก่อนฝังลงไฟล์',true);return;}
-  const html = buildAppHtmlWithEmbeddedUrl(url);
-  if(!html)return;
-  triggerDownload(new Blob([html], {type:'text/html;charset=utf-8'}), 'checklist_app.html');
-  toast('ฝัง URL ลงไฟล์และดาวน์โหลดแล้ว — แจกไฟล์นี้ให้ทีมในโรงงานนี้ได้เลย');
-}
-function downloadResetApp(){
-  const html = buildAppHtmlWithEmbeddedUrl('');
-  if(!html)return;
-  triggerDownload(new Blob([html], {type:'text/html;charset=utf-8'}), 'checklist_app.html');
-  toast('รีเซ็ต URL แล้ว — ไฟล์นี้สะอาด พร้อมส่งให้โรงงาน/บริษัทอื่น');
 }
 
 function setConn(){
@@ -3295,32 +3309,6 @@ async function enterApp(){
   if(currentSession && currentSession.authRole){ await enterApp(); }
   else { await checkFirstTimeSetup(); } // ถ้ายังไม่ login ให้เช็คว่าควรโชว์ฟอร์ม setup ครั้งแรกหรือฟอร์ม login ปกติ
 })();
-
-function ensurePeriodNAButton(){
-  if(!canCloseUnplanned()) return;
-  const modal=document.querySelector('.modal.show,.modal.open,[role="dialog"]:not([hidden])');
-  if(!modal) return;
-  const footer=modal.querySelector('.modal-footer') || [...modal.querySelectorAll('div')].find(d=>{
-    const t=d.textContent||'';
-    return t.includes('ตกลง (อนุมัติ)') && t.includes('ปิด');
-  });
-  if(!footer || footer.querySelector('.btn-period-na')) return;
-  const code=(typeof activeCode!=='undefined' && activeCode) ? activeCode :
-             (typeof selectedCode!=='undefined' && selectedCode) ? selectedCode : '';
-  if(!code) return;
-  const b=document.createElement('button');
-  b.type='button';
-  b.className='btn-period-na'+(isPeriodDisabled(code)?' active':'');
-  b.textContent=isPeriodDisabled(code)?'เปิดช่องกลับเข้าแผน':'ไม่มีในแผน (ปิดช่อง)';
-  b.onclick=async function(){
-    await togglePeriodDisabled(code);
-    const m=document.querySelector('.modal.show,.modal.open,[role="dialog"]:not([hidden])');
-    if(m){ const x=m.querySelector('.btn-period-na'); if(x){x.classList.toggle('active',isPeriodDisabled(code));x.textContent=isPeriodDisabled(code)?'เปิดช่องกลับเข้าแผน':'ไม่มีในแผน (ปิดช่อง)';}}
-  };
-  footer.insertBefore(b,footer.firstChild);
-}
-const _naObserver=new MutationObserver(()=>setTimeout(ensurePeriodNAButton,0));
-window.addEventListener('DOMContentLoaded',()=>_naObserver.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden','style']}));
 
 </script>
 </body>
