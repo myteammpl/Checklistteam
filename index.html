@@ -1813,13 +1813,24 @@ function parseNoteThread(raw){
 function hasManagerComment(rec){ return parseNoteThread(rec.note).some(e=>e.role==='manager'); }
 function nowStamp(){ return new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}); }
 // หา item config + แถว TB ที่ตรงกับรหัส GL ของรายการนั้น (เฉพาะบริษัท+งวดที่กำลังดูอยู่)
+function latestTBRowsForCard(company,period){
+  const key=ckOf(company,period);
+  const rows=Array.isArray(tbData[key]) ? tbData[key] : [];
+  if(!rows.length) return [];
+  // TB_Meta.count = จำนวนแถวของการอัปโหลดล่าสุดของบริษัท+งวดนั้น
+  // หาก TB มีข้อมูลสะสมจากหลาย upload ให้ใช้เฉพาะชุดท้ายสุดของ upload ล่าสุด
+  const meta=tbMeta[key]||{};
+  const count=Number(meta.count);
+  return Number.isFinite(count) && count>0 && rows.length>count ? rows.slice(-count) : rows;
+}
+
 function icTbRowsFor(code,period){
   let item=null;
   config.forEach(cat=>cat.items.forEach(it=>{if(it.code===code) item=it;}));
   if(!item || !item.gl || !item.gl.length) return {item,rows:[]};
-  const tbRows=tbData[ckOf(curCompany,period)]||[];
-  const glSet=new Set(item.gl);
-  return {item, rows: tbRows.filter(r=>glSet.has(r.acct))};
+  const tbRows=latestTBRowsForCard(curCompany,period);
+  const glSet=new Set(item.gl.map(x=>String(x).trim()));
+  return {item, rows: tbRows.filter(r=>glSet.has(String(r.acct||'').trim()))};
 }
 
 let icCurCode=null, icCurPeriod=null, icLinkEditable=false;
@@ -1832,9 +1843,10 @@ function openItemCard(code,period){
   document.getElementById('icTitle').textContent=item?item.detail:code;
 
   const wf=rec.wf||(rec.done?'approved':'draft');
+  const isNA=isPeriodDisabled(code,period);
   const badge=document.getElementById('icStatusBadge');
-  badge.className='ic-status-badge '+wf;
-  badge.textContent = wf==='approved'?'อนุมัติแล้ว':wf==='submitted'?'รอตรวจสอบ':'ยังไม่ส่งงาน';
+  badge.className='ic-status-badge '+(isNA?'na':wf);
+  badge.textContent = isNA?'ไม่มีแผน':(wf==='approved'?'อนุมัติแล้ว':wf==='submitted'?'รอตรวจสอบ':'ยังไม่ส่งงาน');
 
   // TB summary
   const tbWrap=document.getElementById('icTbSummary');
@@ -1912,7 +1924,7 @@ function buildIcFooterAndCommentBox(rec,role,wf,item){
     let btns=`<button class="btn btn-ghost" onclick="closeModal('itemCardModal')">ปิด</button>`;
     // สลับสถานะ "ไม่มีในแผน (ปิดช่อง)" — เฉพาะหัวหน้าแผนก สำหรับรายการที่งวดนี้ไม่ต้องทำจริงๆ
     // ทำให้รายการนั้นไม่ถูกนับใน % ความคืบหน้า และตารางปีจะโชว์เป็นลายตารางแทนช่องว่างเฉยๆ
-    btns+=`<button type="button" class="btn-period-na${isNA?' active':''}" onclick="icToggleNA()">${isNA?'เปิดช่องกลับเข้าแผน':'ไม่มีในแผน (ปิดช่อง)'}</button>`;
+    btns+=`<button type="button" class="btn-period-na${isNA?' active':''}" onclick="icToggleNA()"><span class="na-check">${isNA?'✓':'☐'}</span>${isNA?'เปิดช่องกลับเข้าแผน':'ติ๊กไม่มีแผน'}</button>`;
     if(wf==='approved') btns+=`<button class="btn btn-ghost" style="color:var(--red)" onclick="icReopen()">เปิดใหม่ (ยกเลิกอนุมัติ)</button>`;
     btns+=`<button class="btn btn-pri" style="background:var(--green)" onclick="icApprove()">ตกลง (อนุมัติ)</button>`;
     footer.innerHTML=btns;
