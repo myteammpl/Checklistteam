@@ -310,6 +310,11 @@
   table.tbd-table td.num.neg{color:var(--red)}
   table.tbd-table td.mono{font-family:"SF Mono",ui-monospace,monospace;white-space:nowrap;color:var(--ink)}
   .tbd-msg{color:var(--ink-soft);min-width:220px}
+  table.tbd-table td.tbd-note{min-width:200px}
+  .tbd-note-input{width:100%;min-width:180px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:12.5px;background:#fff}
+  .tbd-note-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .tbd-note-input::placeholder{color:var(--muted)}
+  .tbd-note-ro{font-size:12.5px;color:var(--ink)}
 
   /* ===== Login screen ===== */
   .login-wrap{min-height:100vh;display:grid;place-items:center;background:linear-gradient(160deg,var(--ink) 0%,#233647 100%);padding:20px}
@@ -1206,7 +1211,7 @@
    API_URL — Web App URL ของ Google Apps Script ที่เชื่อมต่อ ฝังตรงนี้ค่าเดียว ไม่มี fallback
    (เปลี่ยนบริษัท/โรงงานอื่น ให้แก้บรรทัดนี้ตรงๆ ในซอร์สโค้ด แล้วแจกไฟล์ต่อ)
    --------------------------------------------------------- */
-const API_URL = "https://script.google.com/macros/s/AKfycbxCsJmQFxhyDLbEa6VbRpAf5f_2lvaKtYK-dy7x36rEP47GzX3kCtvNk7OYQpC0Btrf/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyeMAFGyj4Ri2jONaHKLQFfnYn_2glEkfjWTn0GHxX-MQRGDPgpVNt1Mzvx-RsYsJUS0A/exec";
 
 const CAT_COLORS = {
   '1':'#2f8a4e','2':'#b8791a','3':'#8a6d2f','4':'#2f5f8a',
@@ -1368,6 +1373,7 @@ let hasEverSyncedConfig = load('mpl_ever_synced', false);
 let statusData = load('mpl_status', {});   // { "1160|2569-08": { code: {done,link,note,by,at,owner} } }
 let tbData = load('mpl_tb', {});           // { "1160|2569-08": [rows] }
 let tbMeta = load('mpl_tbmeta', {});       // { "1160|2569-08": {at, by, filename} }  เวลาอัปโหลดล่าสุด
+let tbNotes = load('mpl_tbnotes', {});     // { "1160|2569-08": { "124100": {note,by,at} } } คำอธิบายบัญชีที่ผลตรวจผิดปกติ
 let curYear = load('mpl_curyear', defaultYear());
 let curPeriod = defaultPeriod();
 let dashView = 'card';
@@ -1469,7 +1475,7 @@ function normalizeCfgGL(cfg){
   return Array.isArray(cfg)?cfg:[];
 }
 // เวอร์ชัน backend ที่ HTML ตัวนี้คู่กัน — ถ้า backend ที่ Deploy ไม่ตรง แปลว่ายังไม่ได้ Deploy โค้ดใหม่
-const EXPECTED_BACKEND='2569.08.20-safe5';
+const EXPECTED_BACKEND='2569.09.03-note';
 function updateBackendVer(ver){
   const el=document.getElementById('backendVer'); if(!el) return;
   if(!ver){ // backend เก่าไม่ส่ง version กลับมาเลย
@@ -1528,6 +1534,12 @@ async function syncFromSheet(allYear){
     // TB Safe Sync: Sheet เป็น source of truth แต่ไม่ล้างข้อมูล local ทั้งก้อนจาก response ผิดปกติ
     if(r.tbMeta && typeof r.tbMeta==='object'){
       tbMeta={...tbMeta,...r.tbMeta}; save('mpl_tbmeta',tbMeta);
+    }
+    if(r.tbNotes && typeof r.tbNotes==='object'){
+      // merge รายบริษัท|งวด กันโน้ตที่เพิ่งพิมพ์หายจาก response ที่มาไม่ครบ
+      const mn={...tbNotes};
+      Object.keys(r.tbNotes).forEach(k=>{ mn[k]={...(mn[k]||{}),...(r.tbNotes[k]||{})}; });
+      tbNotes=mn; save('mpl_tbnotes',tbNotes);
     }
     if(!allYear && Array.isArray(r.tb)){
       // Current company+period: direct TB response is authoritative.
@@ -1798,23 +1810,48 @@ function renderTbdRows(){
     body.innerHTML=`<div class="empty" style="padding:22px;text-align:center;color:var(--muted)">ไม่พบรายการที่ตรงกับเงื่อนไข</div>`;
     return;
   }
+  const noteMap = tbNotes[ck(curPeriod)]||{};
+  const canEdit = canEditChecklist(); // นักบัญชี+หัวหน้าแผนก พิมพ์ได้ / ผู้จัดการอ่านอย่างเดียว
   const rowsHtml=list.map(i=>{
     const first=String(i.acct).split(',')[0].trim();
     const r=_tbdByAcct[first];
     const name=r?(r.text||'—'):'—';
     const bal=r?fmt(r.balance):'—';
     const balNeg=r&&r.balance<0;
+    const acctKey=String(i.acct);
+    const noteObj=noteMap[acctKey]||{};
+    const noteVal=noteObj.note||'';
+    const byTip=noteObj.by?`โดย ${noteObj.by}${noteObj.at?' · '+noteObj.at:''}`:'';
+    const acctArg=acctKey.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const noteCell = canEdit
+      ? `<input class="tbd-note-input" value="${escHtml(noteVal).replace(/"/g,'&quot;')}" placeholder="พิมพ์คำอธิบาย..." title="${escHtml(byTip)}" onchange="saveTBNote('${acctArg}',this.value)">`
+      : `<span class="tbd-note-ro" title="${escHtml(byTip)}">${noteVal?escHtml(noteVal):'—'}</span>`;
     return `<tr>
-      <td class="mono">${i.acct}</td>
-      <td>${name}</td>
+      <td class="mono">${escHtml(i.acct)}</td>
+      <td>${escHtml(name)}</td>
       <td class="num ${balNeg?'neg':''}">${bal}</td>
       <td><span class="sev ${i.sev}">${i.sev==='error'?'ผิดพลาด':'เตือน'}</span></td>
-      <td class="tbd-msg">${i.msg}</td>
+      <td class="tbd-msg">${escHtml(i.msg)}</td>
+      <td class="tbd-note">${noteCell}</td>
     </tr>`;
   }).join('');
   body.innerHTML=`<div class="tbd-scroll"><table class="tbd-table">
-    <thead><tr><th>รหัสบัญชี</th><th>ชื่อบัญชี</th><th style="text-align:right">ยอด Balance</th><th>สถานะ</th><th>รายละเอียด</th></tr></thead>
+    <thead><tr><th>รหัสบัญชี</th><th>ชื่อบัญชี</th><th style="text-align:right">ยอด Balance</th><th>สถานะ</th><th>รายละเอียด</th><th>คำอธิบาย (Note)</th></tr></thead>
     <tbody>${rowsHtml}</tbody></table></div>`;
+}
+function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+async function saveTBNote(acct, note){
+  if(!canEditChecklist()){ toast('คุณมีสิทธิ์ดูอย่างเดียว แก้ไขคำอธิบายไม่ได้',true); renderTbdRows(); return; }
+  const k=ck(curPeriod);
+  if(!tbNotes[k]) tbNotes[k]={};
+  tbNotes[k][acct]={ note:note, by:CURRENT_USER_NAME(), at:nowStamp() };
+  save('mpl_tbnotes',tbNotes);
+  if(API_URL){
+    const r=await apiCall('setTBNote',{company:curCompany,period:curPeriod,acct,note,by:CURRENT_USER_NAME()});
+    if(!r||!r.ok){ toast('บันทึกคำอธิบายไม่สำเร็จ',true); return; }
+  }
+  renderTbdRows(); // ให้แถวที่ acct เดียวกันอัปเดตตาม
+  toast('บันทึกคำอธิบายแล้ว');
 }
 function setTbDetailFilter(f){ tbDetailFilter=f; renderTBDetail(); }
 function onTbDetailSearch(v){ tbDetailSearch=v; renderTbdRows(); } // อัปเดตเฉพาะตาราง ไม่ rebuild ช่องค้นหา (โฟกัสไม่หลุด)
