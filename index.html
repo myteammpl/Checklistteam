@@ -315,6 +315,27 @@
   .tbd-note-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .tbd-note-input::placeholder{color:var(--muted)}
   .tbd-note-ro{font-size:12.5px;color:var(--ink)}
+  /* ===== Accrual groups (ค้างรับ/ค้างจ่าย/รับล่วงหน้า/จ่ายล่วงหน้า) ===== */
+  .accr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media(max-width:820px){.accr-grid{grid-template-columns:1fr}}
+  .accr-panel{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card)}
+  .accr-h{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--paper);font-weight:700;font-size:13px}
+  .accr-cnt{font-size:11px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);padding:1px 8px;border-radius:10px}
+  .accr-scroll{max-height:230px;overflow:auto}
+  table.accr-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.accr-table th{position:sticky;top:0;text-align:left;padding:7px 10px;background:#fff;color:var(--muted);font-size:10.5px;text-transform:uppercase;font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.accr-table td{padding:6px 10px;border-bottom:1px solid var(--line)}
+  table.accr-table td.mono{font-family:"SF Mono",ui-monospace,monospace;white-space:nowrap;color:var(--ink)}
+  table.accr-table td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:"SF Mono",ui-monospace,monospace}
+  table.accr-table td.num.neg{color:var(--red)}
+  table.accr-table tfoot td{font-weight:700;background:var(--paper);border-top:1.5px solid var(--line);border-bottom:none}
+  table.accr-table tfoot td.num{text-align:right}
+  /* ===== Revenue vs Cost matching ===== */
+  table.rc-table tfoot td{font-weight:700;background:var(--paper);border-top:1.5px solid var(--line)}
+  .rc-pct{font-weight:700;padding:1px 7px;border-radius:6px;font-size:11.5px}
+  .rc-pct-hi{background:var(--green-bg);color:var(--green)}
+  .rc-pct-mid{background:var(--amber-bg);color:var(--amber)}
+  .rc-pct-lo{background:var(--red-bg);color:var(--red)}
 
   /* ===== Login screen ===== */
   .login-wrap{min-height:100vh;display:grid;place-items:center;background:linear-gradient(160deg,var(--ink) 0%,#233647 100%);padding:20px}
@@ -764,6 +785,14 @@
           <div id="tbDetailControls"></div>
           <div id="tbDetailBody"></div>
         </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>รายละเอียดบัญชี ค้างรับ / ค้างจ่าย / รับล่วงหน้า / จ่ายล่วงหน้า</h2><span class="hint" id="accrualHint"></span></div>
+        <div class="card-body" id="accrualBody"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2>กระทบรายได้และต้นทุนขาย</h2><span class="hint" id="revCostHint"></span></div>
+        <div class="card-body" id="revCostBody"></div>
       </div>
     </div>
 
@@ -1762,7 +1791,135 @@ function renderDash(){
   });
   renderTBValidationSummary();
   renderTBDetail();
+  renderAccrualGroups();
+  renderRevCost();
   if(dashView==='year')renderMatrix();
+}
+
+/* ---------------- กลุ่มบัญชี ค้างรับ/ค้างจ่าย/รับล่วงหน้า/จ่ายล่วงหน้า ----------------
+   จัดกลุ่มจากชื่อบัญชี (Short Text) ของ TB ตามคำสำคัญ */
+const ACCRUAL_GROUPS=[
+  {key:'accrRecv', title:'ค้างรับ',      kw:['ค้างรับ'],      accent:'var(--green)'},
+  {key:'accrPay',  title:'ค้างจ่าย',     kw:['ค้างจ่าย'],     accent:'var(--red)'},
+  {key:'defRecv',  title:'รับล่วงหน้า',   kw:['รับล่วงหน้า'],   accent:'var(--blue)'},
+  {key:'prepaid',  title:'จ่ายล่วงหน้า',  kw:['จ่ายล่วงหน้า'],  accent:'var(--amber)'},
+];
+function classifyAccrual(name){
+  const s=String(name||'');
+  // เช็ค "ล่วงหน้า" ก่อน เพราะเจาะจงกว่า แล้วค่อย "ค้าง"
+  if(s.indexOf('รับล่วงหน้า')>=0) return 'defRecv';
+  if(s.indexOf('จ่ายล่วงหน้า')>=0) return 'prepaid';
+  if(s.indexOf('ค้างรับ')>=0) return 'accrRecv';
+  if(s.indexOf('ค้างจ่าย')>=0) return 'accrPay';
+  return null;
+}
+function renderAccrualGroups(){
+  const body=document.getElementById('accrualBody');
+  const hint=document.getElementById('accrualHint');
+  if(!body) return;
+  const rows=tbData[ck(curPeriod)];
+  if(!rows||!rows.length){ if(hint)hint.textContent=''; body.innerHTML=`<div class="empty" style="padding:22px;text-align:center;color:var(--muted)">ยังไม่มีข้อมูล TB ของงวดนี้</div>`; return; }
+  const buckets={accrRecv:[],accrPay:[],defRecv:[],prepaid:[]};
+  rows.forEach(r=>{ const g=classifyAccrual(r.text); if(g) buckets[g].push(r); });
+  const total=Object.values(buckets).reduce((n,a)=>n+a.length,0);
+  if(hint)hint.textContent=`${total} บัญชีที่เข้ากลุ่ม`;
+  if(!total){ body.innerHTML=`<div class="empty" style="padding:22px;text-align:center;color:var(--muted)">ไม่พบบัญชีที่มีคำว่า ค้างรับ/ค้างจ่าย/รับล่วงหน้า/จ่ายล่วงหน้า ในงวดนี้</div>`; return; }
+  const panel=(g)=>{
+    const list=buckets[g.key];
+    const sum=list.reduce((n,r)=>n+(Number(r.balance)||0),0);
+    const rowsHtml=list.length? list.map(r=>`<tr>
+        <td class="mono">${escHtml(r.acct)}</td>
+        <td>${escHtml(r.text||'—')}</td>
+        <td class="num ${r.balance<0?'neg':''}">${fmt(r.balance)}</td>
+      </tr>`).join('')
+      : `<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:12px">— ไม่มี —</td></tr>`;
+    return `<div class="accr-panel">
+      <div class="accr-h" style="border-left:3px solid ${g.accent}">
+        <span>${g.title}</span><span class="accr-cnt">${list.length} บัญชี</span>
+      </div>
+      <div class="accr-scroll"><table class="accr-table">
+        <thead><tr><th style="width:80px">รหัสบัญชี</th><th>ชื่อบัญชี</th><th style="text-align:right">Balance</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+        <tfoot><tr><td colspan="2">รวม</td><td class="num ${sum<0?'neg':''}">${fmt(sum)}</td></tr></tfoot>
+      </table></div>
+    </div>`;
+  };
+  body.innerHTML=`<div class="accr-grid">${ACCRUAL_GROUPS.map(panel).join('')}</div>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:10px">จัดกลุ่มจากชื่อบัญชี (Short Text) ของ TB ตามคำสำคัญ: ค้างรับ / ค้างจ่าย / รับล่วงหน้า / จ่ายล่วงหน้า</div>`;
+}
+
+/* ---------------- กระทบรายได้และต้นทุนขาย ----------------
+   จับคู่รายได้ (รหัสขึ้นต้น 45) กับต้นทุนขาย (รหัสขึ้นต้น 75) ด้วยเลขท้าย 3 หลัก
+   คำนวณกำไร(ขาดทุน) = รายได้ - ต้นทุน และ % = กำไร/รายได้ · มีช่องคำอธิบายพิมพ์เองได้ */
+function renderRevCost(){
+  const body=document.getElementById('revCostBody');
+  const hint=document.getElementById('revCostHint');
+  if(!body) return;
+  const rows=tbData[ck(curPeriod)];
+  if(!rows||!rows.length){ if(hint)hint.textContent=''; body.innerHTML=`<div class="empty" style="padding:22px;text-align:center;color:var(--muted)">ยังไม่มีข้อมูล TB ของงวดนี้</div>`; return; }
+  // รายได้แสดงเป็นยอดลบใน TB (เครดิต) → กลับเครื่องหมายให้เป็นบวกเพื่ออ่านง่าย
+  const rev={}, cost={};
+  rows.forEach(r=>{ const a=String(r.acct||''); if(/^45/.test(a)) rev[a.slice(-3)]=(rev[a.slice(-3)]||[]).concat(r); else if(/^75/.test(a)) cost[a.slice(-3)]=(cost[a.slice(-3)]||[]).concat(r); });
+  const suffixes=[...new Set([...Object.keys(rev),...Object.keys(cost)])].sort();
+  if(!suffixes.length){ if(hint)hint.textContent=''; body.innerHTML=`<div class="empty" style="padding:22px;text-align:center;color:var(--muted)">ไม่พบบัญชีรายได้ (45xxxx) หรือต้นทุนขาย (75xxxx) ในงวดนี้</div>`; return; }
+  const noteMap=tbNotes[ck(curPeriod)]||{};
+  const canEdit=canEditChecklist();
+  let totRev=0,totCost=0;
+  const bodyRows=suffixes.map(sfx=>{
+    const rl=rev[sfx]||[], cl=cost[sfx]||[];
+    const revAmt=Math.abs(rl.reduce((n,r)=>n+(Number(r.balance)||0),0)); // รายได้เป็นค่าบวก
+    const costAmt=Math.abs(cl.reduce((n,r)=>n+(Number(r.balance)||0),0));
+    totRev+=revAmt; totCost+=costAmt;
+    const gp=revAmt-costAmt; const pct=revAmt?Math.round(gp/revAmt*100):0;
+    const revAcct=rl[0]?rl[0].acct:'—', costAcct=cl[0]?cl[0].acct:'—';
+    const label=(rl[0]&&rl[0].text)||(cl[0]&&cl[0].text)||'';
+    const noteKey='RC:'+sfx;
+    const noteObj=noteMap[noteKey]||{};
+    const noteVal=noteObj.note||'';
+    const noteCell=canEdit
+      ? `<input class="tbd-note-input" value="${escHtml(noteVal).replace(/"/g,'&quot;')}" placeholder="พิมพ์คำอธิบาย..." title="${escHtml(noteObj.by?('โดย '+noteObj.by+(noteObj.at?' · '+noteObj.at:'')):'')}" onchange="saveRevCostNote('${sfx}',this.value)">`
+      : `<span class="tbd-note-ro">${noteVal?escHtml(noteVal):'—'}</span>`;
+    const pctCls=pct>=15?'rc-pct-hi':pct>0?'rc-pct-mid':'rc-pct-lo';
+    return `<tr>
+      <td class="mono">${escHtml(revAcct)}</td>
+      <td>${escHtml(label)}</td>
+      <td class="num">${fmt(revAmt)}</td>
+      <td class="mono">${escHtml(costAcct)}</td>
+      <td class="num">${fmt(costAmt)}</td>
+      <td class="num ${gp<0?'neg':''}">${fmt(gp)}</td>
+      <td class="num"><span class="rc-pct ${pctCls}">${pct}%</span></td>
+      <td class="tbd-note">${noteCell}</td>
+    </tr>`;
+  }).join('');
+  const totGp=totRev-totCost; const totPct=totRev?Math.round(totGp/totRev*100):0;
+  if(hint)hint.textContent=`งวด ${periodLabel(curPeriod)}`;
+  body.innerHTML=`<div class="tbd-scroll"><table class="tbd-table rc-table">
+    <thead><tr>
+      <th>รหัสรายได้</th><th>ชื่อบัญชี</th><th style="text-align:right">รายได้</th>
+      <th>รหัสต้นทุน</th><th style="text-align:right">ต้นทุนขาย</th>
+      <th style="text-align:right">กำไร(ขาดทุน)</th><th style="text-align:right">%</th><th>คำอธิบาย</th>
+    </tr></thead>
+    <tbody>${bodyRows}</tbody>
+    <tfoot><tr>
+      <td colspan="2">รวมทั้งหมด</td>
+      <td class="num">${fmt(totRev)}</td>
+      <td></td>
+      <td class="num">${fmt(totCost)}</td>
+      <td class="num ${totGp<0?'neg':''}">${fmt(totGp)}</td>
+      <td class="num">${totPct}%</td>
+      <td></td>
+    </tr></tfoot>
+  </table></div>
+  <div style="font-size:11.5px;color:var(--muted);margin-top:10px">จับคู่รายได้ (รหัสขึ้นต้น 45) กับต้นทุนขาย (รหัสขึ้นต้น 75) ด้วยเลขท้าย 3 หลัก · รายได้แสดงเป็นค่าบวกเพื่ออ่านง่าย · กำไร(ขาดทุน) = รายได้ − ต้นทุน</div>`;
+}
+async function saveRevCostNote(sfx, note){
+  if(!canEditChecklist()){ toast('คุณมีสิทธิ์ดูอย่างเดียว',true); renderRevCost(); return; }
+  const k=ck(curPeriod), acctKey='RC:'+sfx;
+  if(!tbNotes[k]) tbNotes[k]={};
+  tbNotes[k][acctKey]={ note:note, by:CURRENT_USER_NAME(), at:nowStamp() };
+  save('mpl_tbnotes',tbNotes);
+  if(API_URL){ const r=await apiCall('setTBNote',{company:curCompany,period:curPeriod,acct:acctKey,note,by:CURRENT_USER_NAME()}); if(!r||!r.ok){ toast('บันทึกคำอธิบายไม่สำเร็จ',true); return; } }
+  toast('บันทึกคำอธิบายแล้ว');
 }
 
 /* ---------------- TB issue detail table (filterable) on dashboard ---------------- */
@@ -1873,25 +2030,14 @@ function renderTBValidationSummary(){
   const warns=issues.filter(i=>i.sev==='warn').length;
   const flaggedAccts=new Set();
   issues.forEach(i=>{ String(i.acct).split(',').map(s=>s.trim()).forEach(a=>flaggedAccts.add(a)); });
-  hint.innerHTML=`งวด ${periodLabel(curPeriod)} · <a onclick="goPage('upload')" style="cursor:pointer">ดูรายละเอียด →</a>`;
+  hint.textContent=`งวด ${periodLabel(curPeriod)}`;
 
-  const statHtml=`<div class="val-summary" style="margin:0 0 16px">
+  // แสดงเฉพาะการ์ดสรุป 4 ช่อง — รายการผิดปกติแบบละเอียดดูได้ที่บ็อก "รายละเอียดผลตรวจ TB" ด้านล่าง
+  body.innerHTML=`<div class="val-summary" style="margin:0">
     <div class="val-box"><div class="n">${rows.length}</div><div class="l">บัญชีทั้งหมด</div></div>
     <div class="val-box ${errs?'err':'ok'}"><div class="n">${errs}</div><div class="l">ข้อผิดพลาด (Error)</div></div>
     <div class="val-box ${warns?'warn':'ok'}"><div class="n">${warns}</div><div class="l">คำเตือน (Warning)</div></div>
     <div class="val-box ok"><div class="n">${rows.length-flaggedAccts.size}</div><div class="l">ผ่านการตรวจสอบ</div></div>
-  </div>`;
-
-  if(!issues.length){
-    body.innerHTML=statHtml+`<div class="issue-list" style="border-color:var(--green-line)"><div class="ih" style="background:var(--green-bg);color:var(--green)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>ผ่านการตรวจสอบทั้งหมด ไม่พบรายการผิดปกติ</div></div>`;
-    return;
-  }
-  // แสดงตัวอย่าง 5 รายการแรกในแดชบอร์ด ดูทั้งหมดได้ที่หน้าอัปโหลด
-  const preview=issues.slice(0,5);
-  body.innerHTML=statHtml+`<div class="issue-list">
-    <div class="ih"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>พบรายการผิดปกติ ${issues.length} รายการ</div>
-    ${preview.map(i=>`<div class="issue-row"><span class="sev ${i.sev}">${i.sev==='error'?'ผิดพลาด':'เตือน'}</span><span>${i.msg}</span><span class="mono" style="color:var(--muted)">บัญชี ${i.acct}</span></div>`).join('')}
-    ${issues.length>preview.length?`<div style="padding:9px 15px;border-top:1px solid var(--line);font-size:12.5px"><a onclick="goPage('upload')" style="cursor:pointer">ดูอีก ${issues.length-preview.length} รายการที่หน้าอัปโหลด TB →</a></div>`:''}
   </div>`;
 }
 
