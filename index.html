@@ -696,6 +696,25 @@
   </div>
 </div>
 
+<!-- Saving indicator: แสดงตอนบันทึกข้อมูล + บล็อกคลิกซ้ำระหว่างบันทึก -->
+<style>
+  #savingOverlay{position:fixed;inset:0;z-index:11000;display:none;align-items:flex-start;justify-content:center;background:transparent;pointer-events:none}
+  #savingOverlay.show{display:flex}
+  #savingOverlay.busy{pointer-events:auto;background:rgba(15,30,25,.06)} /* กันคลิกซ้ำเฉพาะตอนกำลังบันทึก */
+  .saving-pill{margin-top:26px;display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.28);font-size:13.5px;font-weight:650;animation:savingIn .18s ease}
+  .saving-pill.done{background:var(--green)}
+  .saving-spin{width:15px;height:15px;border-radius:50%;border:2.5px solid rgba(255,255,255,.32);border-top-color:#fff;animation:mplspin .7s linear infinite;flex:none}
+  .saving-pill.done .saving-spin{display:none}
+  .saving-pill.done::before{content:'✓';font-weight:800;font-size:15px}
+  @keyframes savingIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+</style>
+<div id="savingOverlay">
+  <div class="saving-pill busy">
+    <span class="saving-spin"></span>
+    <span id="savingText">กำลังบันทึกข้อมูล...</span>
+  </div>
+</div>
+
 <div class="layout" id="appLayout" style="display:none">
 <aside class="sidebar" id="sidebar">
   <div class="brand">
@@ -1462,6 +1481,10 @@ function tbInfo(period){const k=ck(period);const rows=tbData[k];const meta=tbMet
    - header 'text/plain;charset=utf-8' หลีกเลี่ยง CORS preflight กับ Apps Script (ตามที่ E-Sign ใช้) */
 async function apiCall(action,payload){
   if(!API_URL) return null;
+  // การ "บันทึก" ทุกชนิด (ไม่ใช่ getAll ที่เป็นการอ่าน) แสดง indicator กลาง + บล็อกคลิกซ้ำ
+  const isWrite = action && action!=='getAll';
+  let okDone=false;
+  if(isWrite) savingStart();
   try{
     const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action, payload:payload||{}})});
     if(!res.ok){
@@ -1483,11 +1506,37 @@ async function apiCall(action,payload){
     // ไฟล์นี้เช็ค r.ok อยู่หลายร้อยจุด จึงแปลงให้ตรงกันตรงทางเข้าเดียว ไม่ต้องไล่แก้ทุกจุดในไฟล์
     if(data && typeof data.ok==='undefined' && typeof data.success!=='undefined'){ data.ok=data.success; }
     if(data && data.success===false && data.error) console.warn('API',action,'returned error:',data.error);
+    okDone = !!(data && data.ok!==false);
     return data;
   }catch(e){
     console.warn('API network error',e);
     toast('เชื่อมต่อ Sheet ไม่สำเร็จ (เครือข่าย/CORS) · ใช้ข้อมูลในเครื่องแทน',true);
     return null;
+  } finally {
+    if(isWrite) savingEnd(okDone);
+  }
+}
+/* ---------------- Saving indicator (แสดงตอนบันทึก กันคลิกซ้ำ) ---------------- */
+let _saveCount=0, _saveTimer=null;
+function savingStart(){
+  _saveCount++;
+  clearTimeout(_saveTimer);
+  const o=document.getElementById('savingOverlay'); if(!o) return;
+  const t=document.getElementById('savingText'); if(t) t.textContent='กำลังบันทึกข้อมูล...';
+  o.querySelector('.saving-pill').className='saving-pill busy';
+  o.classList.add('show','busy');
+}
+function savingEnd(ok){
+  _saveCount=Math.max(0,_saveCount-1);
+  if(_saveCount>0) return; // ยังมีงานบันทึกค้างอยู่ ยังไม่ปิด
+  const o=document.getElementById('savingOverlay'); if(!o) return;
+  o.classList.remove('busy'); // เลิกบล็อกคลิก
+  if(ok){
+    const t=document.getElementById('savingText'); if(t) t.textContent='บันทึกเสร็จสิ้น';
+    o.querySelector('.saving-pill').className='saving-pill done';
+    _saveTimer=setTimeout(()=>o.classList.remove('show'), 1000);
+  } else {
+    o.classList.remove('show');
   }
 }
 // ---- GL normalize ----
