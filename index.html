@@ -429,6 +429,11 @@
   .member-pwd-status.set .dot{background:var(--green)}
   .owner-select{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12.5px;background:#fff}
   .owner-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .cal-filter{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .cal-filter .owner-select{width:auto;min-width:150px;max-width:230px;flex:0 1 auto}
+  .cal-clear{border:1px solid #F0B9B4;background:#FCE8E8;color:#8f2a20;border-radius:6px;padding:6px 12px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s}
+  .cal-clear:hover{background:#F6D3CE}
+  @media(max-width:700px){ .cal-filter .owner-select{min-width:0;flex:1 1 46%;max-width:none} .cal-clear{flex:1 1 100%} }
   .owner-badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-soft)}
   .owner-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
 
@@ -787,7 +792,7 @@
   <div id="userChip"></div>
   <div class="side-foot">
     <div class="conn live" id="connStatus" onclick="openConnect()"><span class="dot"></span><span id="connText">ซิงก์ Google Sheet</span></div>
-    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.10.07-4 · ปฏิทินแยกสถานะ</div>
+    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.10.07-5 · ปฏิทิน: กรองสถานะ+หมวด</div>
     <div id="backendVer" style="font-size:10px;text-align:center;margin-top:2px;letter-spacing:.02em" title="เวอร์ชันของ Apps Script ที่ Deploy อยู่ — ถ้าขึ้นสีแดง/ไม่ตรง แสดงว่ายังไม่ได้ Deploy โค้ดใหม่">Backend: —</div>
   </div>
 </aside>
@@ -2106,11 +2111,13 @@ function wfChip(w){
     : w==='rejected'?'<span class="sev" style="background:#fde7e7;color:var(--red)">ตีกลับ</span>'
     : '<span class="sev" style="background:#eef0ec;color:var(--slate)">ยังไม่ส่ง</span>';
 }
-let _calDay=null, _calScope='this', calDayNameFilter='';
+let _calDay=null, _calScope='this', calDayNameFilter='', calDayStatusFilter='', calDayCatFilter='';
+const WF_LABELS={approved:'อนุมัติแล้ว',submitted:'รอตรวจสอบ',rejected:'ตีกลับ',draft:'ยังไม่ส่ง'};
+function calClearFilters(){ calDayNameFilter=''; calDayStatusFilter=''; calDayCatFilter=''; renderCalDay(); }
 function renderCalDay(day, scope){
-  // คลิกวันใหม่ = รีเซ็ตตัวกรองชื่อ · เรียกจากดรอปดาว (day=null) = คงวัน/ตัวกรองเดิมไว้
+  // คลิกวันใหม่ = รีเซ็ตตัวกรองทั้งหมด · เรียกจากดรอปดาว (day=null) = คงวัน/ตัวกรองเดิมไว้
   if(day!=null){
-    if(_calDay!==day || _calScope!==(scope||'this')) calDayNameFilter='';
+    if(_calDay!==day || _calScope!==(scope||'this')){ calDayNameFilter=''; calDayStatusFilter=''; calDayCatFilter=''; }
     _calDay=day; _calScope=scope||'this';
   }
   if(_calDay==null) return;
@@ -2123,18 +2130,38 @@ function renderCalDay(day, scope){
   card.style.display='';
   document.getElementById('calDayTitle').textContent=`งานครบกำหนด · ${_calDay} ${mName} ${yShow}`;
   if(day!=null) card.scrollIntoView({behavior:'smooth',block:'nearest'});
-  // ตัวกรองชื่อผู้รับผิดชอบ
+  const st=statusOf(curPeriod);
+  const wfOf=x=>{ const rec=st[x.it.code]||{}; return rec.wf||(rec.done?'approved':'draft'); };
+  // รายการตัวเลือกของแต่ละตัวกรอง
   const names=[...new Set(full.map(x=>ownerOf(x.it)||'(ไม่ระบุ)'))].sort();
-  const list = calDayNameFilter ? full.filter(x=>(ownerOf(x.it)||'(ไม่ระบุ)')===calDayNameFilter) : full;
+  const cats=[...new Set(full.map(x=>x.cat||'(ไม่ระบุ)'))].sort();
+  const statuses=['approved','submitted','rejected','draft'].filter(w=>full.some(x=>wfOf(x)===w));
+  // กรองร่วมกันทั้ง 3 เงื่อนไข
+  const list = full.filter(x=>
+    (!calDayNameFilter   || (ownerOf(x.it)||'(ไม่ระบุ)')===calDayNameFilter) &&
+    (!calDayCatFilter    || (x.cat||'(ไม่ระบุ)')===calDayCatFilter) &&
+    (!calDayStatusFilter || wfOf(x)===calDayStatusFilter)
+  );
   document.getElementById('calDayHint').textContent=`${list.length} รายการ`;
-  const nameSel=`<div style="margin-bottom:12px"><select class="owner-select" style="max-width:260px" onchange="calDayNameFilter=this.value;renderCalDay()">
+  const q=s=>escHtml(s).replace(/"/g,'&quot;');
+  const hasFilter=calDayNameFilter||calDayStatusFilter||calDayCatFilter;
+  const filterBar=`<div class="cal-filter">
+    <select class="owner-select" onchange="calDayNameFilter=this.value;renderCalDay()">
       <option value="">— ทุกคน (${full.length}) —</option>
-      ${names.map(n=>`<option value="${escHtml(n).replace(/"/g,'&quot;')}" ${calDayNameFilter===n?'selected':''}>${escHtml(n)}</option>`).join('')}
-    </select></div>`;
+      ${names.map(n=>`<option value="${q(n)}" ${calDayNameFilter===n?'selected':''}>${escHtml(n)}</option>`).join('')}
+    </select>
+    <select class="owner-select" onchange="calDayStatusFilter=this.value;renderCalDay()">
+      <option value="">— ทุกสถานะ —</option>
+      ${statuses.map(w=>`<option value="${w}" ${calDayStatusFilter===w?'selected':''}>${WF_LABELS[w]} (${full.filter(x=>wfOf(x)===w).length})</option>`).join('')}
+    </select>
+    <select class="owner-select" onchange="calDayCatFilter=this.value;renderCalDay()">
+      <option value="">— ทุกหมวด —</option>
+      ${cats.map(n=>`<option value="${q(n)}" ${calDayCatFilter===n?'selected':''}>${escHtml(n)} (${full.filter(x=>(x.cat||'(ไม่ระบุ)')===n).length})</option>`).join('')}
+    </select>
+    ${hasFilter?`<button type="button" class="cal-clear" onclick="calClearFilters()">✕ ล้างตัวกรอง</button>`:''}
+  </div>`;
   if(!full.length){ body.innerHTML=`<div class="empty" style="padding:18px;text-align:center;color:var(--muted)">ไม่มีงานครบกำหนดวันนี้</div>`; return; }
-  body.innerHTML=nameSel+`<div class="tbd-scroll"><table class="tbd-table">
-    <thead><tr><th>รหัส</th><th>รายการ</th><th>หมวด</th><th>ผู้รับผิดชอบ</th><th>กำหนดส่ง</th><th>สถานะงาน</th></tr></thead>
-    <tbody>${list.map(x=>{ const rec=statusOf(curPeriod)[x.it.code]||{}; const w=rec.wf||(rec.done?'approved':'draft');
+  const rows = list.length ? list.map(x=>{ const w=wfOf(x);
       return `<tr style="cursor:pointer" onclick="openItemCard('${x.it.code}',curPeriod)">
       <td class="mono">${escHtml(x.it.code)}</td>
       <td>${escHtml(x.it.detail)}</td>
@@ -2142,7 +2169,11 @@ function renderCalDay(day, scope){
       <td>${escHtml(ownerOf(x.it)||'—')}</td>
       <td>${dueBadgeHtml(x.it)||'—'}</td>
       <td>${wfChip(w)}</td>
-    </tr>`;}).join('')}</tbody>
+    </tr>`;}).join('')
+    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">ไม่มีรายการตรงกับตัวกรองที่เลือก</td></tr>`;
+  body.innerHTML=filterBar+`<div class="tbd-scroll"><table class="tbd-table">
+    <thead><tr><th>รหัส</th><th>รายการ</th><th>หมวด</th><th>ผู้รับผิดชอบ</th><th>กำหนดส่ง</th><th>สถานะงาน</th></tr></thead>
+    <tbody>${rows}</tbody>
   </table></div>`;
 }
 
