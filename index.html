@@ -284,6 +284,7 @@
   .issue-list .ih{background:var(--red-bg);padding:10px 15px;font-weight:650;color:var(--red);font-size:13px;display:flex;align-items:center;gap:8px}
   .issue-row{display:grid;grid-template-columns:120px 1fr 150px;gap:12px;padding:9px 15px;border-top:1px solid var(--line);font-size:12.5px;align-items:center}
   .issue-row .sev{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;text-align:center}
+  .sev{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;text-align:center;white-space:nowrap}
   .sev.error{background:var(--red-bg);color:var(--red)}
   .sev.warn{background:var(--amber-bg);color:var(--amber)}
 
@@ -327,6 +328,39 @@
   .kpi-bar i.mid{background:#f5a524}
   .kpi-bar i.lo{background:var(--red)}
   .kpi-pct{font-size:12px;font-weight:700;color:var(--ink-soft);vertical-align:middle}
+  /* ===== Due date (กำหนดส่ง) — โทนพาสเทล ===== */
+  .due-badge{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap;vertical-align:middle;letter-spacing:.01em}
+  .due-badge.due-overdue{background:#FCE8E8;color:#C0392B}
+  .due-badge.due-near{background:#FEF3DC;color:#B4790C}
+  .due-badge.due-upcoming{background:#EAF2FB;color:#3A6EA5}
+  .due-badge.due-done{background:#E7F4EC;color:#2FA96A}
+  .due-chip{font-size:10.5px;font-weight:700;padding:1px 8px;border-radius:10px}
+  .due-chip.due-overdue{background:#FCE8E8;color:#C0392B}
+  .due-chip.due-near{background:#FEF3DC;color:#B4790C}
+  .cat-card.warn-overdue{border-color:#F0B9B4;box-shadow:0 0 0 1px #F7D4D0 inset,var(--shadow)}
+  .cat-card.warn-near{border-color:#F3DCA6;box-shadow:0 0 0 1px #FBEBC4 inset,var(--shadow)}
+  /* ===== Calendar ===== */
+  .cal-legend{display:inline-flex;align-items:center;gap:4px}
+  .cal-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .cal-legend i.due-overdue{background:#F2B6B0}
+  .cal-legend i.due-near{background:#F6DDA0}
+  .cal-legend i.due-upcoming{background:#BBD4EE}
+  .cal-legend i.due-done{background:#B7E0C6}
+  .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px}
+  .cal-head div{text-align:center;font-size:12px;font-weight:700;color:var(--muted)}
+  .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+  .cal-cell{min-height:74px;border:1px solid var(--line);border-radius:9px;padding:7px 8px;background:#fff;display:flex;flex-direction:column;gap:6px}
+  .cal-cell.empty{border:none;background:transparent}
+  .cal-cell.has{cursor:pointer;transition:.12s}
+  .cal-cell.has:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  .cal-cell .cal-d{font-size:13px;font-weight:700;color:var(--ink-soft)}
+  .cal-cell.today .cal-d{background:var(--accent);color:#fff;width:24px;height:24px;border-radius:50%;display:grid;place-items:center}
+  .cal-cell .cal-count{font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;align-self:flex-start}
+  .cal-cell.due-overdue{background:#FCE8E8;border-color:#F0B9B4} .cal-cell.due-overdue .cal-count{background:#F2B6B0;color:#8f2a20}
+  .cal-cell.due-near{background:#FEF7E8;border-color:#F3DCA6} .cal-cell.due-near .cal-count{background:#F6DDA0;color:#8a5c08}
+  .cal-cell.due-upcoming{background:#F2F7FD;border-color:#CBDDF1} .cal-cell.due-upcoming .cal-count{background:#BBD4EE;color:#2e5a86}
+  .cal-cell.due-done{background:#EEF7F1;border-color:#C7E6D3} .cal-cell.due-done .cal-count{background:#B7E0C6;color:#227048}
+  @media(max-width:700px){ .cal-cell{min-height:56px;padding:5px} .cal-cell .cal-count{font-size:10px} }
   /* ===== Accrual groups (ค้างรับ/ค้างจ่าย/รับล่วงหน้า/จ่ายล่วงหน้า) ===== */
   .accr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
   @media(max-width:820px){.accr-grid{grid-template-columns:1fr}}
@@ -400,7 +434,7 @@
   .admin-cat{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;background:var(--card)}
   .admin-cat-h{padding:12px 15px;background:var(--paper);display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line)}
   .admin-cat-h .name{font-weight:650;font-size:14px;flex:1}
-  .admin-item{display:grid;grid-template-columns:95px 1fr 105px 125px 100px 130px 40px;gap:10px;padding:10px 15px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
+  .admin-item{display:grid;grid-template-columns:95px 1fr 105px 125px 100px 130px 120px 40px;gap:10px;padding:10px 15px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
   .admin-item:last-child{border-bottom:none}
   .admin-item input,.admin-item select{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12.5px;background:#fff}
   .admin-item input:focus,.admin-item select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
@@ -751,7 +785,7 @@
   <div id="userChip"></div>
   <div class="side-foot">
     <div class="conn live" id="connStatus" onclick="openConnect()"><span class="dot"></span><span id="connText">ซิงก์ Google Sheet</span></div>
-    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.09.28 · KPI+Reject</div>
+    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.10.07-2 · Calendar filter+chips</div>
     <div id="backendVer" style="font-size:10px;text-align:center;margin-top:2px;letter-spacing:.02em" title="เวอร์ชันของ Apps Script ที่ Deploy อยู่ — ถ้าขึ้นสีแดง/ไม่ตรง แสดงว่ายังไม่ได้ Deploy โค้ดใหม่">Backend: —</div>
   </div>
 </aside>
@@ -789,7 +823,9 @@
           <button data-view="card" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>การ์ดรายเดือน</button>
           <button data-view="year"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/></svg>ตารางทั้งปี</button>
           <button data-view="kpi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>รายบุคคล (KPI)</button>
+          <button data-view="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>ปฏิทิน</button>
         </div>
+        <button class="btn btn-ghost btn-sm" id="btnSendReminders" style="display:none" onclick="sendRemindersNow()" title="ส่งเมลเตือนกำหนดส่งให้ผู้รับผิดชอบที่ค้างงาน (เดือนปัจจุบัน)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg>ส่งเมลเตือน</button>
         <button class="btn btn-ghost btn-sm" onclick="refreshAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>รีเฟรช</button>
       </div>
     </div>
@@ -867,6 +903,26 @@
       <div class="card" id="kpiDetailCard" style="display:none">
         <div class="card-h"><h2 id="kpiDetailTitle">รายการของผู้รับผิดชอบ</h2><span class="hint" id="kpiDetailHint"></span></div>
         <div class="card-body" id="kpiDetailBody"></div>
+      </div>
+    </div>
+
+    <!-- --- Calendar view --- -->
+    <div id="dashCalView" style="display:none">
+      <div class="card">
+        <div class="card-h">
+          <h2 id="calTitle">ปฏิทินกำหนดส่งงาน</h2>
+          <span style="display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted)">
+            <span class="cal-legend"><i class="due-overdue"></i>เกินกำหนด</span>
+            <span class="cal-legend"><i class="due-near"></i>ใกล้ครบ</span>
+            <span class="cal-legend"><i class="due-upcoming"></i>ยังไม่ถึง</span>
+            <span class="cal-legend"><i class="due-done"></i>เสร็จแล้ว</span>
+          </span>
+        </div>
+        <div class="card-body"><div id="calGrid"></div></div>
+      </div>
+      <div class="card" id="calDayCard" style="display:none">
+        <div class="card-h"><h2 id="calDayTitle">งานที่ครบกำหนด</h2><span class="hint" id="calDayHint"></span></div>
+        <div class="card-body" id="calDayBody"></div>
       </div>
     </div>
   </section>
@@ -1590,7 +1646,7 @@ function normalizeCfgGL(cfg){
   return Array.isArray(cfg)?cfg:[];
 }
 // เวอร์ชัน backend ที่ HTML ตัวนี้คู่กัน — ถ้า backend ที่ Deploy ไม่ตรง แปลว่ายังไม่ได้ Deploy โค้ดใหม่
-const EXPECTED_BACKEND='2569.09.03-note';
+const EXPECTED_BACKEND='2569.10.07-due2';
 function updateBackendVer(ver){
   const el=document.getElementById('backendVer'); if(!el) return;
   if(!ver){ // backend เก่าไม่ส่ง version กลับมาเลย
@@ -1829,6 +1885,16 @@ function overallProgress(){
   let d=0,t=0;config.forEach(c=>{const p=catProgress(c);d+=p.done;t+=p.total;});
   return {done:d,total:t};
 }
+// นับงานเกินกำหนด/ใกล้ครบของหมวด (เฉพาะงานในแผน ยังไม่เสร็จ ของงวดที่เลือก)
+function catDueCounts(cat){
+  let overdue=0, near=0;
+  enabledItemsOf(cat).forEach(it=>{
+    if(isPeriodDisabled(it.code)) return;
+    const st=dueStatus(it,curPeriod);
+    if(st==='overdue') overdue++; else if(st==='near') near++;
+  });
+  return {overdue,near};
+}
 
 /* ---------------- Dashboard view toggle ---------------- */
 document.getElementById('dashViewSeg').addEventListener('click',async e=>{
@@ -1839,8 +1905,10 @@ document.getElementById('dashViewSeg').addEventListener('click',async e=>{
   document.getElementById('dashCardView').style.display=dashView==='card'?'block':'none';
   document.getElementById('dashYearView').style.display=dashView==='year'?'block':'none';
   document.getElementById('dashKpiView').style.display=dashView==='kpi'?'block':'none';
+  document.getElementById('dashCalView').style.display=dashView==='cal'?'block':'none';
   if(dashView==='year'){await syncFromSheet(true);renderMatrix();}
   else if(dashView==='kpi'){ await syncFromSheet(true); renderKPI(); } // KPI ทั้งปีต้องใช้ข้อมูลทุกเดือน
+  else if(dashView==='cal'){ renderCalendar(); }
   else{renderDash();}   // รีเฟรชการ์ดให้ตรงกับที่ติ๊กในตารางปี
 });
 
@@ -1959,9 +2027,112 @@ function kpiShowPerson(name, keepFilter){
   </table></div>`;
 }
 
+/* ---------------- Calendar view (ปฏิทินกำหนดส่ง) ---------------- */
+function calDueByDay(){
+  const [y,m]=curPeriod.split('-').map(Number);
+  const gY=y-543, gM=m;
+  const thisMap={}, nextMap={};
+  config.forEach(cat=>enabledItemsOf(cat).forEach(it=>{
+    const d=Number(it.due); if(!d) return;
+    if(isPeriodDisabled(it.code)) return;
+    const dd=dueDateOf(it,curPeriod); if(!dd) return;
+    const bucket=(String(it.dueMode||'')==='next')?nextMap:thisMap;
+    const day=dd.getDate();
+    (bucket[day]=bucket[day]||[]).push({it, cat:cat.name, st:dueStatus(it,curPeriod)});
+  }));
+  let nY=gY,nM=gM+1; if(nM>12){nM=1;nY=gY+1;}
+  return {thisMap, nextMap, gY, gM, daysIn:new Date(gY,gM,0).getDate(), nY, nM, nextDaysIn:new Date(nY,nM,0).getDate()};
+}
+function calWorst(list){
+  if(list.some(x=>x.st==='overdue')) return 'due-overdue';
+  if(list.some(x=>x.st==='near')) return 'due-near';
+  if(list.some(x=>x.st==='upcoming')) return 'due-upcoming';
+  return 'due-done';
+}
+// สร้างกริดปฏิทิน 1 เดือน (gY,gM เป็น ค.ศ.) จาก map วัน->รายการ · scope ใช้บอกว่าเป็นเดือนนี้หรือเดือนถัดไปตอนคลิก
+function calMonthGrid(map, gY, gM, scope){
+  const daysIn=new Date(gY,gM,0).getDate();
+  const first=new Date(gY,gM-1,1).getDay();
+  const today=new Date(); const isThisMonth=(today.getFullYear()===gY && (today.getMonth()+1)===gM); const todayD=today.getDate();
+  const dow=['อา','จ','อ','พ','พฤ','ศ','ส'];
+  let html='<div class="cal-head">'+dow.map(d=>`<div>${d}</div>`).join('')+'</div><div class="cal-days">';
+  for(let i=0;i<first;i++) html+='<div class="cal-cell empty"></div>';
+  for(let d=1;d<=daysIn;d++){
+    const list=map[d]||[];
+    const worst=list.length?calWorst(list):'';
+    const isToday=isThisMonth&&d===todayD;
+    html+=`<div class="cal-cell${list.length?' has '+worst:''}${isToday?' today':''}" ${list.length?`onclick="renderCalDay(${d},'${scope}')"`:''}>
+      <div class="cal-d">${d}</div>
+      ${list.length?`<div class="cal-count">${list.length} งาน</div>`:''}
+    </div>`;
+  }
+  return html+'</div>';
+}
+function renderCalendar(){
+  const grid=document.getElementById('calGrid'); if(!grid) return;
+  document.getElementById('calTitle').textContent='ปฏิทินกำหนดส่งงาน · '+periodLabel(curPeriod);
+  document.getElementById('calDayCard').style.display='none';
+  const c=calDueByDay();
+  let html='<div class="cal-wrap">'+calMonthGrid(c.thisMap,c.gY,c.gM,'this')+'</div>';
+  const hasNext=Object.keys(c.nextMap).length>0;
+  if(hasNext){
+    html+=`<div style="margin-top:18px"><div style="font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:8px">
+      ⏭️ กำหนดส่งเดือนถัดไป · ${MONTHS[c.nM-1]} ${c.nY+543} <span style="font-weight:400;color:var(--muted)">(งานของงวด ${periodLabel(curPeriod)})</span></div>
+      <div class="cal-wrap">${calMonthGrid(c.nextMap,c.nY,c.nM,'next')}</div></div>`;
+  }
+  grid.innerHTML=html;
+}
+// สถานะงานแบบชิปสี (ใช้ร่วมกับหน้ารายบุคคล)
+function wfChip(w){
+  return w==='approved'?'<span class="sev" style="background:var(--green-bg);color:var(--green)">อนุมัติแล้ว</span>'
+    : w==='submitted'?'<span class="sev" style="background:#fef1dc;color:#c17608">รอตรวจสอบ</span>'
+    : w==='rejected'?'<span class="sev" style="background:#fde7e7;color:var(--red)">ตีกลับ</span>'
+    : '<span class="sev" style="background:#eef0ec;color:var(--slate)">ยังไม่ส่ง</span>';
+}
+let _calDay=null, _calScope='this', calDayNameFilter='';
+function renderCalDay(day, scope){
+  // คลิกวันใหม่ = รีเซ็ตตัวกรองชื่อ · เรียกจากดรอปดาว (day=null) = คงวัน/ตัวกรองเดิมไว้
+  if(day!=null){
+    if(_calDay!==day || _calScope!==(scope||'this')) calDayNameFilter='';
+    _calDay=day; _calScope=scope||'this';
+  }
+  if(_calDay==null) return;
+  const c=calDueByDay();
+  const map=_calScope==='next'?c.nextMap:c.thisMap;
+  const full=(map[_calDay]||[]).slice();
+  const mName=_calScope==='next'?MONTHS[c.nM-1]:MONTHS[c.gM-1];
+  const yShow=_calScope==='next'?(c.nY+543):(c.gY+543);
+  const card=document.getElementById('calDayCard'), body=document.getElementById('calDayBody');
+  card.style.display='';
+  document.getElementById('calDayTitle').textContent=`งานครบกำหนด · ${_calDay} ${mName} ${yShow}`;
+  if(day!=null) card.scrollIntoView({behavior:'smooth',block:'nearest'});
+  // ตัวกรองชื่อผู้รับผิดชอบ
+  const names=[...new Set(full.map(x=>ownerOf(x.it)||'(ไม่ระบุ)'))].sort();
+  const list = calDayNameFilter ? full.filter(x=>(ownerOf(x.it)||'(ไม่ระบุ)')===calDayNameFilter) : full;
+  document.getElementById('calDayHint').textContent=`${list.length} รายการ`;
+  const nameSel=`<div style="margin-bottom:12px"><select class="owner-select" style="max-width:260px" onchange="calDayNameFilter=this.value;renderCalDay()">
+      <option value="">— ทุกคน (${full.length}) —</option>
+      ${names.map(n=>`<option value="${escHtml(n).replace(/"/g,'&quot;')}" ${calDayNameFilter===n?'selected':''}>${escHtml(n)}</option>`).join('')}
+    </select></div>`;
+  if(!full.length){ body.innerHTML=`<div class="empty" style="padding:18px;text-align:center;color:var(--muted)">ไม่มีงานครบกำหนดวันนี้</div>`; return; }
+  body.innerHTML=nameSel+`<div class="tbd-scroll"><table class="tbd-table">
+    <thead><tr><th>รหัส</th><th>รายการ</th><th>หมวด</th><th>ผู้รับผิดชอบ</th><th>กำหนดส่ง</th><th>สถานะงาน</th></tr></thead>
+    <tbody>${list.map(x=>{ const rec=statusOf(curPeriod)[x.it.code]||{}; const w=rec.wf||(rec.done?'approved':'draft');
+      return `<tr style="cursor:pointer" onclick="openItemCard('${x.it.code}',curPeriod)">
+      <td class="mono">${escHtml(x.it.code)}</td>
+      <td>${escHtml(x.it.detail)}</td>
+      <td>${escHtml(x.cat)}</td>
+      <td>${escHtml(ownerOf(x.it)||'—')}</td>
+      <td>${dueBadgeHtml(x.it)||'—'}</td>
+      <td>${wfChip(w)}</td>
+    </tr>`;}).join('')}</tbody>
+  </table></div>`;
+}
+
 /* ---------------- Dashboard ---------------- */
 function renderDash(){
   document.getElementById('dashSub').textContent=`งวด ${periodLabel(curPeriod)} · ติดตามความคืบหน้าของทุกหมวดงาน`;
+  const _br=document.getElementById('btnSendReminders'); if(_br) _br.style.display = (CURRENT_ROLE()==='supervisor') ? '' : 'none';
   const ov=overallProgress();
   const pct=ov.total?Math.round(ov.done/ov.total*100):0;
   const doneCat=config.filter(c=>{const p=catProgress(c);return p.total&&p.done===p.total;}).length;
@@ -1982,14 +2153,19 @@ function renderDash(){
     const cls=p.total&&p.done===p.total?'done':p.done>0?'prog':'none';
     const txt=cls==='done'?'เสร็จสมบูรณ์':cls==='prog'?'กำลังดำเนินการ':'ยังไม่เริ่ม';
     const col=CAT_COLORS[cat.id]||'#546374';
-    const el=document.createElement('div');el.className='cat-card';el.onclick=()=>{curTab=cat.id;goPage('check');};
+    const dc=catDueCounts(cat);
+    const warnCls = dc.overdue?' warn-overdue' : dc.near?' warn-near' : '';
+    const dueChip = dc.overdue
+      ? `<span class="due-chip due-overdue">เกินกำหนด ${dc.overdue}</span>`
+      : dc.near ? `<span class="due-chip due-near">ใกล้ครบ ${dc.near}</span>` : '';
+    const el=document.createElement('div');el.className='cat-card'+warnCls;el.onclick=()=>{curTab=cat.id;goPage('check');};
     el.innerHTML=`
       <div class="top">
         <div class="name"><span class="cat-badge" style="background:${col}">${cat.id}</span>${cat.name}</div>
         <span class="status-chip ${cls}">${txt}</span>
       </div>
       <div class="pbar"><i class="ok" style="width:${pc}%"></i></div>
-      <div class="meta"><span>${p.done}/${p.total} รายการ</span><span>${pc}%</span></div>`;
+      <div class="meta"><span>${p.done}/${p.total} รายการ</span><span style="display:flex;gap:6px;align-items:center">${dueChip}<span>${pc}%</span></span></div>`;
     grid.appendChild(el);
   });
   renderTBValidationSummary();
@@ -1998,6 +2174,7 @@ function renderDash(){
   renderRevCost();
   if(dashView==='year')renderMatrix();
   if(dashView==='kpi')renderKPI();
+  if(dashView==='cal')renderCalendar();
 }
 
 /* ---------------- กลุ่มบัญชี ค้างรับ/ค้างจ่าย/รับล่วงหน้า/จ่ายล่วงหน้า ----------------
@@ -2613,6 +2790,66 @@ async function setItemDefaultOwner(code,ownerName){
   if(document.getElementById('page-admin')?.classList.contains('active')) renderAdmin();
   toast(ownerName?`กำหนดผู้รับผิดชอบ: ${ownerName}`:'ล้างผู้รับผิดชอบแล้ว');
 }
+
+/* ---------------- Due date (กำหนดส่ง) ----------------
+   เก็บเป็น "วันที่ของเดือน" (it.due = 1-31) ใน config ใช้ทุกเดือนจนกว่าจะเปลี่ยน
+   สถานะเตือน: เทียบวันครบกำหนดของงวดที่เลือกกับวันนี้ เฉพาะงานที่ยังไม่เสร็จ */
+const DUE_NEAR_DAYS=3;
+function dueDateOf(it, period){
+  const d=Number(it&&it.due); if(!d||d<1||d>31) return null;
+  const [y,m]=(period||curPeriod).split('-').map(Number);
+  let gY=y-543, gM=m; // แปลงปีพุทธ -> ค.ศ. เพื่อคำนวณวันที่จริง
+  if(String(it.dueMode||'')==='next'){ gM=gM+1; if(gM>12){gM=1;gY=gY+1;} } // ภายในวันที่ due ของเดือนถัดไป
+  const last=new Date(gY,gM,0).getDate();
+  return new Date(gY,gM-1,Math.min(d,last));
+}
+function todayMidnight(){ const n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()); }
+// คืนสถานะกำหนดส่ง: 'done' | 'none' | 'overdue' | 'near' | 'upcoming'
+function dueStatus(it, period){
+  const wf=(statusOf(period||curPeriod)[it.code]||{}); const w=wf.wf||(wf.done?'approved':'draft');
+  if(w==='approved') return 'done';
+  const dd=dueDateOf(it,period); if(!dd) return 'none';
+  const days=Math.round((dd-todayMidnight())/86400000);
+  if(days<0) return 'overdue';
+  if(days<=DUE_NEAR_DAYS) return 'near';
+  return 'upcoming';
+}
+function dueDaysLeft(it, period){ const dd=dueDateOf(it,period); if(!dd) return null; return Math.round((dd-todayMidnight())/86400000); }
+function dueBadgeHtml(it, period){
+  const d=Number(it&&it.due); if(!d) return '';
+  period=period||curPeriod;
+  const dd=dueDateOf(it,period); if(!dd) return '';
+  const mon=MONTHS[dd.getMonth()]||''; // เดือนจริงของวันครบกำหนด (รองรับเดือนถัดไป)
+  const next=String(it.dueMode||'')==='next';
+  const days=dueDaysLeft(it,period);
+  const st=dueStatus(it,period);
+  let cls='due-upcoming', suffix='';
+  if(st==='overdue'){ cls='due-overdue'; suffix=' · เกิน '+Math.abs(days)+'วัน'; }
+  else if(st==='near'){ cls='due-near'; suffix=days===0?' · วันนี้':(' · อีก '+days+'วัน'); }
+  else if(st==='done'){ cls='due-done'; }
+  return `<span class="due-badge ${cls}" title="กำหนดส่งทุกวันที่ ${d} ของเดือน${next?'ถัดไป':'นั้น'}">⏰ ${('0'+d).slice(-2)} ${mon}${next?'*':''}${suffix}</span>`;
+}
+function dueOptionsHtml(sel){
+  let opts='<option value="">— ไม่กำหนด —</option>';
+  for(let d=1;d<=31;d++){ opts+=`<option value="${d}" ${Number(sel)===d?'selected':''}>ทุกวันที่ ${d}</option>`; }
+  return opts;
+}
+function dueSelectHtml(it){
+  return `<select class="owner-select" onclick="event.stopPropagation()" onchange="setItemDue('${it.code}',this.value)" title="วันครบกำหนดส่งประจำรายการนี้ (ใช้ทุกเดือน)">${dueOptionsHtml(it.due)}</select>`;
+}
+async function setItemDue(code, dueVal){
+  if(!canEditItemConfig()){toast('คุณไม่มีสิทธิ์ตั้งวันครบกำหนด',true);return;}
+  let found=null;
+  config.forEach(cat=>(cat.items||[]).forEach(it=>{ if(it.code===code) found=it; }));
+  if(!found) return;
+  found.due = dueVal===''?'':Number(dueVal);
+  configByCompany[curCompany]=config; save('mpl_config_by_company',configByCompany);
+  if(API_URL){ const r=await apiCall('setConfig',{company:curCompany,config}); if(!r||!r.ok){ toast('บันทึกวันครบกำหนดไม่สำเร็จ',true); } }
+  renderCheck(); renderDash();
+  if(document.getElementById('page-admin')?.classList.contains('active')) renderAdmin();
+  toast(dueVal?`กำหนดส่งทุกวันที่ ${dueVal}`:'ล้างวันครบกำหนดแล้ว');
+}
+
 function renderCheck(){
   const tabs=document.getElementById('checkTabs');tabs.innerHTML='';
   config.forEach(cat=>{
@@ -2655,7 +2892,7 @@ function renderCheck(){
     tr.innerHTML=`
       <td><div class="ckbox ${isNA?'na':(wf==='approved'?'on':wf)} " onclick="${openCard}" style="cursor:pointer" title="คลิกเพื่อเปิดรายละเอียด">${isNA?'':ckboxInner}</div></td>
       <td class="code-cell" style="cursor:pointer" onclick="${openCard}">${it.code}</td>
-      <td class="detail-cell" style="cursor:pointer" onclick="${openCard}"><b>${it.detail}${tipsIcon}</b>${isNA?'<span class="na-chip">ไม่มีในแผน</span>':''}${glTags?`<div class="gl-tags">${glTags}</div>`:''}</td>
+      <td class="detail-cell" style="cursor:pointer" onclick="${openCard}"><b>${it.detail}${tipsIcon}</b>${isNA?'<span class="na-chip">ไม่มีในแผน</span>':(dueBadgeHtml(it)?' '+dueBadgeHtml(it):'')}${glTags?`<div class="gl-tags">${glTags}</div>`:''}</td>
       <td class="owner-cell">${ownerCellHtml(it)}</td>
       <td><span class="out-tag">${it.output||'-'}</span></td>
       <td>${linkTxt}</td>
@@ -2990,7 +3227,7 @@ function renderAdmin(){
         <button class="icon-btn del" onclick="delCategory(${ci})" title="ลบหมวดนี้"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>`:''}
       </div>
       <div class="admin-item" style="background:var(--paper);font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:650">
-        <span>รหัส</span><span>รายการ (Detail)</span><span>ผลลัพธ์</span><span>รหัสบัญชี GL (คั่นด้วย ,)</span><span>TIPS</span><span>ผู้รับผิดชอบประจำ</span><span></span>
+        <span>รหัส</span><span>รายการ (Detail)</span><span>ผลลัพธ์</span><span>รหัสบัญชี GL (คั่นด้วย ,)</span><span>TIPS</span><span>ผู้รับผิดชอบประจำ</span><span>กำหนดส่ง</span><span></span>
       </div>
       ${cat.items.map((it,ii)=>{
         const ownerVal=it.owner||'';
@@ -3008,7 +3245,14 @@ function renderAdmin(){
               <input type="checkbox" class="tips-check" ${it.tipsShow?'checked':''} ${it.tips?'':'disabled'} onchange="config[${ci}].items[${ii}].tipsShow=this.checked">
             </div>
           </div>
-          <select class="owner-select" onchange="setItemDefaultOwner('${it.code}',this.value)" title="ผู้รับผิดชอบประจำรายการนี้ — ใช้ทุกเดือน/ทุกปีจนกว่าจะเปลี่ยน">${ownerOptions(ownerVal)}</select>
+          <select class="owner-select" onchange="config[${ci}].items[${ii}].owner=this.value" title="ผู้รับผิดชอบประจำรายการนี้ (บันทึกเมื่อกดปุ่ม 'บันทึกการตั้งค่า')">${ownerOptions(ownerVal)}</select>
+          ${canEditCfg?`<div style="display:flex;flex-direction:column;gap:4px">
+            <select class="owner-select" onchange="config[${ci}].items[${ii}].due=this.value?Number(this.value):''" title="วันครบกำหนดส่ง (บันทึกเมื่อกดปุ่ม 'บันทึกการตั้งค่า')">${dueOptionsHtml(it.due)}</select>
+            <select class="owner-select" onchange="config[${ci}].items[${ii}].dueMode=this.value" title="ครบกำหนดภายในเดือนของงวด หรือเดือนถัดไป">
+              <option value="" ${(it.dueMode||'')!=='next'?'selected':''}>ภายในเดือนนั้น</option>
+              <option value="next" ${(it.dueMode||'')==='next'?'selected':''}>ภายในเดือนถัดไป</option>
+            </select>
+          </div>`:`<span style="font-size:12.5px;color:var(--ink-soft)">${it.due?('ทุกวันที่ '+it.due+((it.dueMode||'')==='next'?' (เดือนถัดไป)':'')):'—'}</span>`}
           ${canEditCfg?`<button class="icon-btn del" onclick="delItem(${ci},${ii})" title="ลบ"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>`:'<span></span>'}
         </div>`;
       }).join('')}`;
@@ -3690,6 +3934,14 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 let toastT;
 function toast(msg,err){const t=document.getElementById('toast');document.getElementById('toastText').textContent=msg;t.style.background=err?'var(--red)':'var(--ink)';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
 async function refreshAll(){await syncFromSheet();renderDash();toast('รีเฟรชข้อมูลแล้ว');}
+// ส่งเมลเตือนกำหนดส่งเดี๋ยวนี้ (เฉพาะหัวหน้าแผนก) — เรียก backend ให้ส่งเมลให้ผู้รับผิดชอบที่ค้างงานของเดือนปัจจุบัน
+async function sendRemindersNow(){
+  if(CURRENT_ROLE()!=='supervisor'){ toast('เฉพาะหัวหน้าแผนกเท่านั้น',true); return; }
+  if(!confirm('ส่งเมลเตือนกำหนดส่งให้ผู้รับผิดชอบที่ยังค้างงานของเดือนนี้ตอนนี้เลยไหม?')) return;
+  const r=await apiCall('sendReminders',{dryRun:false});
+  if(r&&r.ok){ toast(`ส่งเมลเตือนแล้ว ${r.sent||0} ฉบับ (งวด ${r.period||''})`); }
+  else { toast('ส่งเมลไม่สำเร็จ — ตรวจว่า Deploy backend ใหม่แล้วและอนุญาตสิทธิ์ส่งเมล',true); }
+}
 
 /* ---------------- Init ---------------- */
 /* ---------------- Auth: hashing, login, reset, session ---------------- */
