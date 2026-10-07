@@ -792,7 +792,7 @@
   <div id="userChip"></div>
   <div class="side-foot">
     <div class="conn live" id="connStatus" onclick="openConnect()"><span class="dot"></span><span id="connText">ซิงก์ Google Sheet</span></div>
-    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.10.07-5 · ปฏิทิน: กรองสถานะ+หมวด</div>
+    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.10.07-8 · เพิ่มปุ่มลิงก์เข้าระบบในเมล</div>
     <div id="backendVer" style="font-size:10px;text-align:center;margin-top:2px;letter-spacing:.02em" title="เวอร์ชันของ Apps Script ที่ Deploy อยู่ — ถ้าขึ้นสีแดง/ไม่ตรง แสดงว่ายังไม่ได้ Deploy โค้ดใหม่">Backend: —</div>
   </div>
 </aside>
@@ -1653,7 +1653,7 @@ function normalizeCfgGL(cfg){
   return Array.isArray(cfg)?cfg:[];
 }
 // เวอร์ชัน backend ที่ HTML ตัวนี้คู่กัน — ถ้า backend ที่ Deploy ไม่ตรง แปลว่ายังไม่ได้ Deploy โค้ดใหม่
-const EXPECTED_BACKEND='2569.10.07-due3';
+const EXPECTED_BACKEND='2569.10.07-mail4';
 function updateBackendVer(ver){
   const el=document.getElementById('backendVer'); if(!el) return;
   if(!ver){ // backend เก่าไม่ส่ง version กลับมาเลย
