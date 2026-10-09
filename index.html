@@ -792,7 +792,7 @@
   <div id="userChip"></div>
   <div class="side-foot">
     <div class="conn live" id="connStatus" onclick="openConnect()"><span class="dot"></span><span id="connText">ซิงก์ Google Sheet</span></div>
-    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.10.07-8 · เพิ่มปุ่มลิงก์เข้าระบบในเมล</div>
+    <div style="font-size:10px;color:#5a6b7a;text-align:center;margin-top:6px;letter-spacing:.02em" title="ตรวจสอบว่าทุกคนในทีมใช้ไฟล์เวอร์ชันเดียวกัน — ถ้าเลขไม่ตรงกัน แสดงว่ามีคนใช้ไฟล์เก่าอยู่">HTML v2569.10.07-10 · เมลข้ามรายการที่ไม่ต้องทำ</div>
     <div id="backendVer" style="font-size:10px;text-align:center;margin-top:2px;letter-spacing:.02em" title="เวอร์ชันของ Apps Script ที่ Deploy อยู่ — ถ้าขึ้นสีแดง/ไม่ตรง แสดงว่ายังไม่ได้ Deploy โค้ดใหม่">Backend: —</div>
   </div>
 </aside>
@@ -1618,21 +1618,21 @@ async function apiCall(action,payload){
 }
 /* ---------------- Saving indicator (แสดงตอนบันทึก กันคลิกซ้ำ) ---------------- */
 let _saveCount=0, _saveTimer=null;
-function savingStart(){
+function savingStart(busyText){
   _saveCount++;
   clearTimeout(_saveTimer);
   const o=document.getElementById('savingOverlay'); if(!o) return;
-  const t=document.getElementById('savingText'); if(t) t.textContent='กำลังบันทึกข้อมูล...';
+  const t=document.getElementById('savingText'); if(t) t.textContent=busyText||'กำลังบันทึกข้อมูล...';
   o.querySelector('.saving-pill').className='saving-pill busy';
   o.classList.add('show','busy');
 }
-function savingEnd(ok){
+function savingEnd(ok, doneText){
   _saveCount=Math.max(0,_saveCount-1);
   if(_saveCount>0) return; // ยังมีงานบันทึกค้างอยู่ ยังไม่ปิด
   const o=document.getElementById('savingOverlay'); if(!o) return;
   o.classList.remove('busy'); // เลิกบล็อกคลิก
   if(ok){
-    const t=document.getElementById('savingText'); if(t) t.textContent='บันทึกเสร็จสิ้น';
+    const t=document.getElementById('savingText'); if(t) t.textContent=doneText||'บันทึกเสร็จสิ้น';
     o.querySelector('.saving-pill').className='saving-pill done';
     _saveTimer=setTimeout(()=>o.classList.remove('show'), 1000);
   } else {
@@ -1653,7 +1653,7 @@ function normalizeCfgGL(cfg){
   return Array.isArray(cfg)?cfg:[];
 }
 // เวอร์ชัน backend ที่ HTML ตัวนี้คู่กัน — ถ้า backend ที่ Deploy ไม่ตรง แปลว่ายังไม่ได้ Deploy โค้ดใหม่
-const EXPECTED_BACKEND='2569.10.07-mail4';
+const EXPECTED_BACKEND='2569.10.07-mail5';
 function updateBackendVer(ver){
   const el=document.getElementById('backendVer'); if(!el) return;
   if(!ver){ // backend เก่าไม่ส่ง version กลับมาเลย
@@ -3981,7 +3981,20 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
 let toastT;
 function toast(msg,err){const t=document.getElementById('toast');document.getElementById('toastText').textContent=msg;t.style.background=err?'var(--red)':'var(--ink)';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
-async function refreshAll(){await syncFromSheet();renderDash();toast('รีเฟรชข้อมูลแล้ว');}
+let _refreshing=false;
+async function refreshAll(){
+  if(_refreshing) return;            // กันกดรัวๆ ระหว่างกำลังรีเฟรช
+  _refreshing=true;
+  savingStart('กำลังรีเฟรชข้อมูล...'); // overlay หมุนๆ + บล็อกคลิก
+  try{
+    await syncFromSheet();
+    renderDash();
+    savingEnd(true,'รีเฟรชข้อมูลสำเร็จ');
+  }catch(e){
+    savingEnd(false);
+    toast('รีเฟรชข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง',true);
+  }finally{ _refreshing=false; }
+}
 // ส่งเมลเตือนกำหนดส่งเดี๋ยวนี้ (เฉพาะหัวหน้าแผนก) — เรียก backend ให้ส่งเมลให้ผู้รับผิดชอบที่ค้างงานของเดือนปัจจุบัน
 async function sendRemindersNow(){
   if(CURRENT_ROLE()!=='supervisor'){ toast('เฉพาะหัวหน้าแผนกเท่านั้น',true); return; }
